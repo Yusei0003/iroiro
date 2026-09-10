@@ -313,11 +313,11 @@ button.ghost{
   <div class="grid" id="panel-import" role="tabpanel" aria-labelledby="tab-import">
     <section class="panel wide">
       <div class="band sky">広　報</div>
-      <div class="desc">PDFを選ぶと、この端末の中だけで文字を読み取ります。</div>
+      <div class="desc">PDFを選ぶだけで、この端末の中で自動的に名簿と照合します。</div>
       <form id="pdfForm" style="border-top:none;padding-top:0;">
         <span class="chip-label sky">PDFから取り込む</span>
         <div class="fields"><input type="file" id="pdfFile" accept="application/pdf,.pdf"></div>
-        <div class="hint">読み取るのは端末内だけで、ファイルも中身も外部には送信されません。名簿との照合と、見出しの候補づくりを行います。</div>
+        <div class="hint">ファイルを選ぶと自動で読み取りが始まり、名簿(登録済みの氏名)と自動で照合します。読み取るのは端末内だけで、ファイルも中身も外部には送信されません。</div>
         <button type="submit" class="go">読み取る</button>
         <div id="pdfMsg"></div>
       </form>
@@ -331,6 +331,7 @@ button.ghost{
         </div>
         <textarea id="issueNote" placeholder="メモ(掲載内容・慶弔欄の対象期間など)" maxlength="600"></textarea>
         <button type="submit" class="go">記録する</button>
+        <div id="issueMsg"></div>
       </form>
       <form id="backupForm">
         <span class="chip-label sand">データの保存と復元</span>
@@ -356,6 +357,7 @@ button.ghost{
           <input type="date" id="rosterBirth" aria-label="生年月日">
         </div>
         <button type="submit" class="go">追加する</button>
+        <div id="rosterMsg"></div>
       </form>
       <form id="csvForm">
         <span class="chip-label sand">CSVでまとめて追加</span>
@@ -507,6 +509,10 @@ button.ghost{
     const local = store.koho.map(d => Object.assign({ kind:"local" }, d));
     return seed.concat(local).sort((a,b)=> String(b.date).localeCompare(String(a.date)));
   }
+  // 同じ号(号名+発行日が一致)がすでに登録されているか
+  function issueExists(title, date){
+    return allIssues().some(d => d.title === title && d.date === date);
+  }
   function renderIssues(){
     const rows = allIssues();
     setFigure("figIssues", rows.length, "号");
@@ -539,10 +545,15 @@ button.ghost{
     const title = $("issueTitle").value.trim();
     const date = $("issueDate").value;
     if(!title || !date) return;
+    if(issueExists(title, date)){
+      say($("issueMsg"), "同じ号(" + title + " ・ " + fmtDate(date) + ")がすでに登録されています", true);
+      return;
+    }
     store.koho.push({ id: uid(), title, date, note: $("issueNote").value.trim() });
     save(); renderIssues();
     $("issueTitle").value = ""; $("issueNote").value = "";
     $("issueDate").valueAsDate = new Date();
+    say($("issueMsg"), "記録しました");
   });
 
   /* ---------- 名簿 ---------- */
@@ -564,13 +575,24 @@ button.ghost{
     store.recipients = store.recipients.filter(r => r.id !== btn.dataset.del);
     save(); renderRoster();
   });
+  // 同じ氏名(表記ゆれは無視)・同じ生年月日の人がすでに名簿にいるか
+  function recipientExists(name, birthDate){
+    const key = norm(name);
+    return store.recipients.some(r => norm(r.name) === key && (r.birthDate || null) === (birthDate || null));
+  }
   $("rosterForm").addEventListener("submit",(e)=>{
     e.preventDefault();
     const name = $("rosterName").value.trim();
     if(!name) return;
-    store.recipients.push({ id: uid(), name, birthDate: $("rosterBirth").value || null, addedAt: new Date().toISOString() });
+    const birthDate = $("rosterBirth").value || null;
+    if(recipientExists(name, birthDate)){
+      say($("rosterMsg"), "同じ氏名・生年月日がすでに名簿にあります", true);
+      return;
+    }
+    store.recipients.push({ id: uid(), name, birthDate, addedAt: new Date().toISOString() });
     save(); renderRoster();
     $("rosterName").value = ""; $("rosterBirth").value = "";
+    say($("rosterMsg"), "追加しました");
   });
 
   function parseCsvLine(line){
@@ -645,11 +667,12 @@ button.ghost{
       const text = await readTextFile(file);
       let rows = text.split(/\r\n|\r|\n/).filter(l=>l.trim()).map(parseCsvLine);
       if(rows.length && /氏名|名前|name/i.test(rows[0][0] || "")) rows = rows.slice(1);
-      let added = 0, skipped = 0, unread = 0;
+      let added = 0, skipped = 0, unread = 0, dup = 0;
       rows.forEach(([rawName, rawBirth])=>{
         const name = (rawName || "").trim();
         if(!name){ skipped++; return; }
         const birthDate = parseBirth(rawBirth);
+        if(recipientExists(name, birthDate)){ dup++; return; }
         const rec = { id: uid(), name, birthDate, addedAt: new Date().toISOString() };
         if(!birthDate && rawBirth && rawBirth.trim()){ rec.birthRaw = rawBirth.trim(); unread++; }
         store.recipients.push(rec);
@@ -658,7 +681,8 @@ button.ghost{
       save(); renderRoster();
       say($("csvMsg"), added + "件を名簿に追加しました"
         + (skipped ? " / " + skipped + "件は氏名が空のため除外" : "")
-        + (unread ? " / " + unread + "件は生年月日を読み取れずそのまま保存" : ""));
+        + (unread ? " / " + unread + "件は生年月日を読み取れずそのまま保存" : "")
+        + (dup ? " / " + dup + "件はすでに名簿にあるため除外" : ""), dup > 0 && added === 0);
       $("csvFile").value = "";
     }catch(err){
       say($("csvMsg"), "取り込めませんでした: " + (err.message || err), true);
@@ -861,6 +885,11 @@ button.ghost{
     return { title: "広報りくぜんたかた", date: "", from: "自動では判別できませんでした" };
   }
 
+  // ファイルを選んだ時点で自動的に読み取りを始める(ボタンは手動の読み取り直し用に残す)
+  $("pdfFile").addEventListener("change", ()=>{
+    if($("pdfFile").files[0]) $("pdfForm").requestSubmit();
+  });
+
   let readResult = null;
   $("pdfForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
@@ -908,6 +937,7 @@ button.ghost{
     const r = readResult;
     if(!r){ $("pdfResult").innerHTML = ""; return; }
     const hit = r.matches.length > 0;
+    const dupNow = issueExists(r.guess.title, r.guess.date);
     $("pdfResult").innerHTML =
       '<div class="readout"><h3>読み取り結果</h3>'
       + '<div class="sub">' + esc(r.file) + ' ・ 全' + r.pages + 'ページ'
@@ -917,6 +947,7 @@ button.ghost{
         + '<input type="date" id="roDate" value="' + esc(r.guess.date) + '" aria-label="発行日">'
       + '</div>'
       + '<div class="hint">' + esc(r.guess.from || "自動判別") + '。必要に応じて直してください。</div>'
+      + '<div id="roDupWarn"' + (dupNow ? '' : ' hidden') + '><div class="toast bad">この号はすでに登録されています。号の名前か発行日を確認してください。</div></div>'
       + '<div class="found' + (hit ? " hit" : "") + '">'
         + (!store.recipients.length ? "名簿が空のため照合していません"
            : hit ? "名簿と照合 → 該当 " + r.matches.length + "件:" + r.matches.map(m=>m.name).join("、")
@@ -932,10 +963,21 @@ button.ghost{
       + '<button type="button" class="go" id="roSave">この内容で保存する</button>'
       + '<div id="roMsg"></div></div>';
 
+    const roTitle = $("roTitle"), roDate = $("roDate"), roDupWarn = $("roDupWarn");
+    function refreshDupWarn(){
+      roDupWarn.hidden = !issueExists(roTitle.value.trim(), roDate.value);
+    }
+    roTitle.addEventListener("input", refreshDupWarn);
+    roDate.addEventListener("input", refreshDupWarn);
+
     $("roSave").addEventListener("click", ()=>{
       const title = $("roTitle").value.trim();
       const date = $("roDate").value;
       if(!title || !date){ say($("roMsg"), "号の名前と発行日を入れてください", true); return; }
+      if(issueExists(title, date)){
+        say($("roMsg"), "同じ号(" + title + " ・ " + fmtDate(date) + ")がすでに登録されています", true);
+        return;
+      }
 
       const picked = Array.from(document.querySelectorAll("[data-head]"))
         .filter(cb => cb.checked)
