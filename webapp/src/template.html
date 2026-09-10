@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="広報取り込み">
+<meta name="theme-color" content="#63b3d8">
+<title>広報取り込みアプリ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#f3f7f8; --surface:#ffffff; --surface-2:#fafcfc;
+  --ink:#2c3438; --ink-soft:#4d5a60; --muted:#7d8c93;
+  --line:#dce8ec; --line-strong:#c3d7de;
+  --sky:#63b3d8; --sky-deep:#2f7fa6; --sky-soft:#e4f2f8;
+  --leaf:#8cc084; --leaf-deep:#4f8a48; --leaf-soft:#eaf4e6;
+  --rose:#eb9db4; --rose-deep:#b8617c; --rose-soft:#fbecf1;
+  --sand:#d9a44f; --sand-soft:#faf1e2;
+  --coral:#d4726a; --coral-soft:#fbeae7;
+  --on-accent:#ffffff;
+  --shadow:0 1px 2px rgba(44,52,56,.05),0 8px 22px -16px rgba(44,52,56,.35);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#191e21; --surface:#222a2e; --surface-2:#1e2528;
+    --ink:#e8eef0; --ink-soft:#c2ccd0; --muted:#93a2a8;
+    --line:#334046; --line-strong:#43535a;
+    --sky:#6fbadd; --sky-deep:#9dd4ee; --sky-soft:#25353e;
+    --leaf:#8fc487; --leaf-deep:#a8d5a0; --leaf-soft:#26332a;
+    --rose:#e9a4b9; --rose-deep:#f0b7c8; --rose-soft:#382730;
+    --sand:#e0bc80; --sand-soft:#372f22;
+    --coral:#e59289; --coral-soft:#3a2724;
+    --on-accent:#1a2226;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 26px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#191e21; --surface:#222a2e; --surface-2:#1e2528;
+  --ink:#e8eef0; --ink-soft:#c2ccd0; --muted:#93a2a8;
+  --line:#334046; --line-strong:#43535a;
+  --sky:#6fbadd; --sky-deep:#9dd4ee; --sky-soft:#25353e;
+  --leaf:#8fc487; --leaf-deep:#a8d5a0; --leaf-soft:#26332a;
+  --rose:#e9a4b9; --rose-deep:#f0b7c8; --rose-soft:#382730;
+  --sand:#e0bc80; --sand-soft:#372f22;
+  --coral:#e59289; --coral-soft:#3a2724;
+  --on-accent:#1a2226;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 26px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box;}
+html{color-scheme:light dark;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic",Meiryo,system-ui,sans-serif;
+  line-height:1.65;
+  font-variant-numeric:tabular-nums;
+  -webkit-text-size-adjust:100%;
+}
+img{max-width:100%;}
+[hidden]{display:none !important;}
+.sheet{max-width:1060px;margin:0 auto;padding:22px 16px 60px;display:flex;flex-direction:column;gap:16px;}
+h1,h2,h3{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;margin:0;text-wrap:balance;}
+
+.masthead{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--surface);border-radius:16px;border:1px solid var(--line);
+  box-shadow:var(--shadow);padding:18px 22px;position:relative;overflow:hidden;
+}
+.masthead::before{content:"";position:absolute;inset:0 auto 0 0;width:7px;background:linear-gradient(180deg,var(--sky),var(--leaf));}
+.masthead h1{font-size:1.4rem;font-weight:700;letter-spacing:.06em;}
+.masthead .lead{color:var(--muted);font-size:.82rem;margin-top:3px;}
+.masthead .left{padding-left:12px;}
+.stamp{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 15px;font-size:.8rem;font-weight:500;background:var(--sky-soft);color:var(--sky-deep);}
+.stamp .dot{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none;}
+.stamp.alert{background:var(--coral-soft);color:var(--coral);}
+.stamp.calm{background:var(--leaf-soft);color:var(--leaf-deep);}
+
+.tabs{display:flex;gap:7px;flex-wrap:wrap;}
+.tabs button{
+  font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;
+  font-size:.85rem;font-weight:700;letter-spacing:.03em;
+  padding:9px 18px;border-radius:999px;
+  border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);cursor:pointer;
+}
+.tabs button:hover{color:var(--ink);}
+.tabs button[aria-selected="true"]{border-color:transparent;color:var(--on-accent);}
+.tabs button[data-tone="sky"][aria-selected="true"]{background:var(--sky);}
+.tabs button[data-tone="leaf"][aria-selected="true"]{background:var(--leaf);}
+.tabs button[data-tone="rose"][aria-selected="true"]{background:var(--rose);}
+.tabs button[data-tone="sand"][aria-selected="true"]{background:var(--sand);}
+.tabs button:focus-visible{outline:2px solid var(--sky-deep);outline-offset:2px;}
+
+.figures{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:13px 20px 15px;}
+.figures h2{font-size:.88rem;font-weight:700;color:var(--sky-deep);letter-spacing:.08em;margin-bottom:9px;}
+.figures .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px;}
+.figures .col + .col{border-left:2px dotted var(--line-strong);padding-left:15px;}
+.figures .label{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.figures .label::before{content:"◆";color:var(--sky);font-size:.66rem;}
+.figures .value{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;font-size:1.4rem;font-weight:700;line-height:1.3;}
+.figures .value .unit{font-size:.78rem;font-weight:500;color:var(--muted);margin-left:3px;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start;gap:16px;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px 20px 20px;display:flex;flex-direction:column;gap:13px;}
+.panel.wide{grid-column:1/-1;}
+.band{
+  border-radius:10px;padding:8px 16px;text-align:center;
+  font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;
+  font-weight:700;font-size:.98rem;letter-spacing:.5em;text-indent:.5em;color:var(--on-accent);
+}
+.band.sky{background:var(--sky);} .band.rose{background:var(--rose);}
+.band.leaf{background:var(--leaf);} .band.sand{background:var(--sand);}
+.panel .desc{font-size:.78rem;color:var(--muted);text-align:center;margin-top:-5px;}
+
+.list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;}
+.empty{color:var(--muted);font-size:.84rem;text-align:center;padding:18px 8px;border:2px dotted var(--line-strong);border-radius:12px;}
+
+.entry{display:flex;align-items:baseline;gap:10px;padding:8px 10px;border-bottom:1px dotted var(--line-strong);}
+.entry:last-child{border-bottom:none;}
+.entry .nm{font-weight:500;letter-spacing:.08em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.entry .paren{color:var(--muted);font-size:.76rem;white-space:nowrap;}
+.entry button{border:none;background:none;color:var(--muted);cursor:pointer;font-size:.73rem;padding:3px 6px;border-radius:6px;flex:none;}
+.entry button:hover{color:var(--coral);background:var(--coral-soft);}
+
+.log{border-left:4px solid var(--leaf);background:var(--leaf-soft);border-radius:0 10px 10px 0;padding:9px 13px;}
+.log.hit{border-left-color:var(--coral);background:var(--coral-soft);}
+.log .head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+.log .issue{font-weight:500;font-size:.86rem;}
+.log .verdict{font-size:.73rem;font-weight:500;white-space:nowrap;color:var(--leaf-deep);}
+.log.hit .verdict{color:var(--coral);}
+.log .hits{font-size:.82rem;margin-top:3px;}
+.log .snip{font-size:.75rem;color:var(--ink-soft);margin-top:3px;word-break:break-all;}
+.log .sub{font-size:.71rem;color:var(--muted);margin-top:2px;}
+.log button.del{border:none;background:none;color:var(--muted);cursor:pointer;font-size:.71rem;padding:2px 6px;}
+
+.issue-card{border:1px solid var(--line);border-radius:12px;padding:10px 13px;background:var(--surface-2);}
+.issue-card .t{font-weight:500;font-size:.9rem;font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;}
+.issue-card .d{font-size:.73rem;color:var(--muted);margin-top:1px;}
+.issue-card .n{font-size:.82rem;margin-top:5px;white-space:pre-wrap;color:var(--ink-soft);}
+
+.toc{display:flex;flex-direction:column;gap:15px;}
+.toc-issue .toc-title{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;font-weight:700;font-size:.96rem;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.toc-issue .toc-date{font-size:.74rem;color:var(--muted);font-weight:400;}
+.toc-issue ol{list-style:none;margin:9px 0 0;padding:0;display:flex;flex-direction:column;}
+.toc-issue li{display:flex;gap:11px;align-items:baseline;padding:7px 3px;border-bottom:1px dotted var(--line-strong);font-size:.87rem;}
+.toc-issue li:last-child{border-bottom:none;}
+.toc-issue .pg{flex:none;width:26px;height:26px;border-radius:50%;background:var(--sky-soft);color:var(--sky-deep);display:grid;place-items:center;font-size:.71rem;font-weight:700;font-family:"Zen Maru Gothic",sans-serif;}
+.toc-issue .ttl{flex:1;min-width:0;}
+.toc-issue .ttl .sup{display:block;font-size:.73rem;color:var(--muted);}
+
+.next-pickup{border-radius:14px;background:var(--sand-soft);padding:16px 18px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 15px;}
+.next-pickup .kicker{font-size:.77rem;color:var(--muted);width:100%;}
+.next-pickup .what{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;font-size:1.45rem;font-weight:700;color:var(--ink);}
+.next-pickup .when{font-size:.98rem;font-weight:500;color:var(--sand);}
+.gomi-rows{display:flex;flex-direction:column;}
+.gomi-row{display:flex;align-items:baseline;gap:11px;padding:9px 3px;border-bottom:1px dotted var(--line-strong);}
+.gomi-row:last-child{border-bottom:none;}
+.gomi-row .kind{flex:none;min-width:6.5em;font-weight:500;font-size:.88rem;display:flex;align-items:center;gap:7px;}
+.gomi-row .kind::before{content:"◆";font-size:.64rem;color:var(--sand);}
+.gomi-row .when{flex:1;font-size:.88rem;}
+.gomi-row .soon{flex:none;font-size:.71rem;padding:2px 10px;border-radius:999px;background:var(--sand-soft);color:var(--sand);font-weight:500;}
+.notice{font-size:.79rem;color:var(--ink-soft);background:var(--surface-2);border:1px dashed var(--line-strong);border-radius:12px;padding:10px 13px;}
+.notice strong{color:var(--coral);font-weight:700;}
+.source{font-size:.73rem;color:var(--muted);}
+
+.search-row{display:flex;gap:8px;align-items:center;}
+input[type="search"]{flex:1;font-size:.95rem;padding:11px 14px;border-radius:999px;border:1px solid var(--line-strong);}
+.hits-head{font-size:.77rem;color:var(--muted);}
+.hit-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:9px 5px;border-bottom:1px dotted var(--line-strong);}
+.hit-row:last-child{border-bottom:none;}
+.hit-row .item{font-weight:500;font-size:.91rem;}
+.hit-row .note{font-size:.77rem;color:var(--muted);flex-basis:100%;}
+.cat-chip{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;font-size:.74rem;font-weight:700;padding:2px 12px;border-radius:999px;white-space:nowrap;}
+.cat-chip.coral{background:var(--coral-soft);color:var(--coral);}
+.cat-chip.sky{background:var(--sky-soft);color:var(--sky-deep);}
+.cat-chip.leaf{background:var(--leaf-soft);color:var(--leaf-deep);}
+.cat-chip.sand{background:var(--sand-soft);color:var(--sand);}
+.cat-chip.gray{background:var(--line);color:var(--ink-soft);}
+.guess{font-size:.69rem;color:var(--muted);border:1px solid var(--line-strong);border-radius:999px;padding:1px 8px;}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:13px;align-items:start;}
+.cat-card{border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:12px 14px;}
+.cat-card .cat-head{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:4px;}
+.cat-card .freq{font-size:.73rem;color:var(--muted);}
+.cat-card ul{list-style:none;margin:5px 0 0;padding:0;display:flex;flex-direction:column;gap:3px;}
+.cat-card li{font-size:.81rem;display:flex;gap:7px;align-items:baseline;line-height:1.55;}
+.cat-card li::before{flex:none;font-weight:700;font-size:.75rem;}
+.cat-card li.ok::before{content:"○";color:var(--leaf-deep);}
+.cat-card li.ng::before{content:"×";color:var(--coral);}
+.cat-card li.tip::before{content:"・";color:var(--muted);}
+
+form{display:flex;flex-direction:column;gap:9px;padding-top:12px;border-top:1px dotted var(--line-strong);}
+form .fields{display:flex;gap:8px;flex-wrap:wrap;}
+.chip-label{display:inline-block;align-self:flex-start;font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;font-size:.78rem;font-weight:700;padding:3px 14px;border-radius:999px;}
+.chip-label.leaf{background:var(--leaf-soft);color:var(--leaf-deep);}
+.chip-label.rose{background:var(--rose-soft);color:var(--rose-deep);}
+.chip-label.sky{background:var(--sky-soft);color:var(--sky-deep);}
+.chip-label.sand{background:var(--sand-soft);color:var(--sand);}
+input,textarea{font:inherit;font-size:.85rem;padding:8px 11px;border:1px solid var(--line-strong);border-radius:9px;background:var(--surface);color:var(--ink);flex:1;min-width:130px;}
+input[type="file"]{padding:6px 9px;font-size:.79rem;}
+textarea{resize:vertical;min-height:56px;width:100%;}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--sky);outline-offset:1px;}
+.hint{font-size:.72rem;color:var(--muted);}
+button.go{
+  align-self:flex-start;font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;
+  font-size:.85rem;font-weight:700;letter-spacing:.04em;padding:8px 20px;
+  border:none;border-radius:999px;background:var(--sky);color:var(--on-accent);cursor:pointer;
+}
+button.go.rose{background:var(--rose);}
+button.go:hover{filter:brightness(1.06);}
+button.go:disabled{opacity:.45;cursor:default;}
+button.ghost{
+  align-self:flex-start;font:inherit;font-size:.8rem;padding:7px 16px;
+  border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--ink-soft);cursor:pointer;
+}
+.toast{font-size:.8rem;color:var(--leaf-deep);background:var(--leaf-soft);border-radius:10px;padding:8px 12px;}
+.toast.bad{color:var(--coral);background:var(--coral-soft);}
+.toast.busy{color:var(--sky-deep);background:var(--sky-soft);}
+
+/* PDF読み取り結果 */
+.readout{border:1px solid var(--sky);border-radius:14px;padding:15px 17px;display:flex;flex-direction:column;gap:12px;background:var(--surface-2);}
+.readout h3{font-size:.95rem;font-weight:700;color:var(--sky-deep);}
+.readout .fields{display:flex;gap:8px;flex-wrap:wrap;}
+.readout .sub{font-size:.76rem;color:var(--muted);}
+.readout .found{font-size:.85rem;border-radius:10px;padding:9px 12px;background:var(--leaf-soft);color:var(--leaf-deep);}
+.readout .found.hit{background:var(--coral-soft);color:var(--coral);font-weight:500;}
+.head-pick{display:flex;flex-direction:column;gap:2px;max-height:260px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);}
+.head-pick label{display:flex;gap:9px;align-items:flex-start;font-size:.83rem;padding:4px 2px;cursor:pointer;}
+.head-pick input{flex:none;min-width:0;margin-top:5px;}
+.head-pick .pg{flex:none;font-size:.72rem;color:var(--muted);min-width:2.6em;}
+
+.colophon{display:flex;align-items:flex-start;gap:12px;color:var(--muted);font-size:.74rem;line-height:1.7;padding:0 6px;}
+.colophon .page-no{flex:none;width:30px;height:30px;border-radius:50%;background:var(--sky);color:var(--on-accent);display:grid;place-items:center;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:.8rem;}
+</style>
+</head>
+<body>
+<script type="application/json" id="seedData">__SEED_JSON__</script>
+<script>__PDFJS_LIB__</script>
+<script type="text/plain" id="pdfWorkerSrc">__PDFJS_WORKER__</script>
+
+<div class="sheet">
+  <header class="masthead">
+    <div class="left">
+      <h1>広報取り込みアプリ</h1>
+      <div class="lead">陸前高田市広報の取り込み・名簿照合・見出し案内・ごみ収集日</div>
+    </div>
+    <div id="stamp" class="stamp"><span class="dot"></span><span>この端末に保存</span></div>
+  </header>
+
+  <section class="figures">
+    <h2>数字で見る取り込み状況</h2>
+    <div class="cols">
+      <div class="col"><div class="label">取り込んだ広報</div><div class="value" id="figIssues">―<span class="unit">号</span></div></div>
+      <div class="col"><div class="label">名簿の登録</div><div class="value" id="figRoster">―<span class="unit">人</span></div></div>
+      <div class="col"><div class="label">照合の記録</div><div class="value" id="figChecks">―<span class="unit">件</span></div></div>
+      <div class="col"><div class="label">次のごみ収集</div><div class="value" id="figGomi">―</div></div>
+    </div>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="画面の切り替え">
+    <button role="tab" id="tab-import" aria-controls="panel-import" aria-selected="true" data-tone="sky">広報の取り込み</button>
+    <button role="tab" id="tab-roster" aria-controls="panel-roster" aria-selected="false" data-tone="leaf">名簿と照合</button>
+    <button role="tab" id="tab-toc" aria-controls="panel-toc" aria-selected="false" data-tone="rose">見出し案内</button>
+    <button role="tab" id="tab-gomi" aria-controls="panel-gomi" aria-selected="false" data-tone="sand">高田8区のごみ</button>
+  </nav>
+
+  <div class="grid" id="panel-import" role="tabpanel" aria-labelledby="tab-import">
+    <section class="panel wide">
+      <div class="band sky">広　報</div>
+      <div class="desc">PDFを選ぶと、この端末の中だけで文字を読み取ります。</div>
+      <form id="pdfForm" style="border-top:none;padding-top:0;">
+        <span class="chip-label sky">PDFから取り込む</span>
+        <div class="fields"><input type="file" id="pdfFile" accept="application/pdf,.pdf"></div>
+        <div class="hint">読み取るのは端末内だけで、ファイルも中身も外部には送信されません。名簿との照合と、見出しの候補づくりを行います。</div>
+        <button type="submit" class="go">読み取る</button>
+        <div id="pdfMsg"></div>
+      </form>
+      <div id="pdfResult"></div>
+      <div id="issueList" class="list"></div>
+      <form id="issueForm">
+        <span class="chip-label sky">号を追加</span>
+        <div class="fields">
+          <input type="text" id="issueTitle" placeholder="号・見出し(例:令和8年10月号)" required maxlength="80">
+          <input type="date" id="issueDate" required aria-label="発行日">
+        </div>
+        <textarea id="issueNote" placeholder="メモ(掲載内容・慶弔欄の対象期間など)" maxlength="600"></textarea>
+        <button type="submit" class="go">記録する</button>
+      </form>
+      <form id="backupForm">
+        <span class="chip-label sand">データの保存と復元</span>
+        <div class="hint">名簿と照合記録をJSONファイルに書き出せます。機種変更や別の端末に移すときにお使いください。</div>
+        <div class="fields">
+          <button type="button" class="ghost" id="exportBtn">書き出す</button>
+          <input type="file" id="importFile" accept="application/json,.json" aria-label="読み込むファイル">
+        </div>
+        <div id="backupMsg"></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="grid" id="panel-roster" role="tabpanel" aria-labelledby="tab-roster" hidden>
+    <section class="panel">
+      <div class="band leaf">名　簿</div>
+      <div class="desc">照合に使う氏名と生年月日。この端末の中だけに保存されます。</div>
+      <div id="rosterList" class="list"></div>
+      <form id="rosterForm">
+        <span class="chip-label leaf">1件ずつ追加</span>
+        <div class="fields">
+          <input type="text" id="rosterName" placeholder="氏名" required maxlength="60">
+          <input type="date" id="rosterBirth" aria-label="生年月日">
+        </div>
+        <button type="submit" class="go">追加する</button>
+      </form>
+      <form id="csvForm">
+        <span class="chip-label sand">CSVでまとめて追加</span>
+        <div class="fields"><input type="file" id="csvFile" accept=".csv,text/csv"></div>
+        <div class="hint">「氏名,生年月日」の2列。ヘッダー行は省略できます。生年月日は和暦(H12.3.7・平成12年3月7日)でも西暦(2000/3/7)でも読み取ります。Excelで保存したShift_JISのCSVにも対応しています。</div>
+        <button type="submit" class="go">取り込む</button>
+        <div id="csvMsg"></div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="band rose">照　合</div>
+      <div class="desc">広報の慶弔欄を貼り付けると、名簿と突き合わせます。</div>
+      <form id="matchForm" style="border-top:none;padding-top:0;">
+        <span class="chip-label rose">慶弔欄を貼り付けて照合</span>
+        <input type="text" id="matchIssue" placeholder="号の名前(例:令和8年9月号)" maxlength="80">
+        <textarea id="matchText" placeholder="広報の「おくやみ」欄の文字を貼り付けてください" rows="4"></textarea>
+        <button type="submit" class="go rose">照合する</button>
+        <div id="matchMsg"></div>
+      </form>
+      <div id="checkList" class="list"></div>
+      <div class="notice">照合はこの端末の中だけで行われ、記録には<strong>該当した氏名のみ</strong>が残ります。広報に載っている他の方の情報は保存しません。</div>
+    </section>
+  </div>
+
+  <div class="grid" id="panel-toc" role="tabpanel" aria-labelledby="tab-toc" hidden>
+    <section class="panel wide">
+      <div class="band rose">見出し案内</div>
+      <div class="desc">取り込んだ号の主な記事を、ページ順にご案内します。</div>
+      <div id="tocList" class="toc"></div>
+    </section>
+  </div>
+
+  <div class="grid" id="panel-gomi" role="tabpanel" aria-labelledby="tab-gomi" hidden>
+    <section class="panel wide">
+      <div class="band sand">高田町8区のごみ</div>
+      <div class="desc">広報の「ごみ収集日」から、高田町8区の分を抜き出しています。</div>
+      <div id="gomiBody"></div>
+    </section>
+    <section class="panel wide">
+      <div class="band leaf">分別早見表</div>
+      <div class="desc">品目を入力すると区分が出ます。市ホームページ「家庭ごみ・資源」の記載にもとづく早見表です。</div>
+      <div class="search-row"><input type="search" id="bunbetsuQ" placeholder="品目で探す(例:電球、布団、スプレー缶)" autocomplete="off"></div>
+      <div id="bunbetsuResult"></div>
+      <div id="bunbetsuCats" class="cat-grid"></div>
+    </section>
+  </div>
+
+  <footer class="colophon">
+    <span class="page-no">i</span>
+    <span>名簿・照合記録はこの端末のブラウザ内(localStorage)にのみ保存され、外部には送信されません。ブラウザのデータを消去すると失われるため、「データの保存と復元」で控えを取ってください。ごみ収集日・分別・見出しは広報および市ホームページの記載を書き写したものです。変更されることがあるため、最新の広報もあわせてご確認ください。</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const SEED = JSON.parse(document.getElementById("seedData").textContent);
+  const KEY = "koho-app.v1";
+  const WD = ["日","月","火","水","木","金","土"];
+
+  /* ---------- 保存 ---------- */
+  const blank = { recipients: [], checks: [], koho: [], headlines: [] };
+  let store = blank;
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) store = Object.assign({}, blank, JSON.parse(raw));
+  }catch(e){ store = blank; }
+
+  let saveWarned = false;
+  function save(){
+    try{
+      localStorage.setItem(KEY, JSON.stringify(store));
+    }catch(e){
+      if(!saveWarned){
+        saveWarned = true;
+        setStamp("alert","この端末に保存できません");
+      }
+    }
+  }
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+  /* ---------- 小道具 ---------- */
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const toDate = (v) => {
+    if(!v) return null;
+    const d = new Date(String(v).length === 10 ? v + "T00:00:00" : v);
+    return isNaN(d) ? null : d;
+  };
+  const fmtDate = (v) => {
+    const d = toDate(v);
+    return d ? d.toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric"}) : String(v ?? "");
+  };
+  const fmtMD = (d) => (d.getMonth()+1) + "月" + d.getDate() + "日(" + WD[d.getDay()] + ")";
+  const fmtStamp = (v) => {
+    const d = toDate(v);
+    return d ? d.toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
+  };
+  const ageOf = (birth) => {
+    const b = toDate(birth);
+    if(!b) return null;
+    const now = new Date();
+    let a = now.getFullYear() - b.getFullYear();
+    const m = now.getMonth() - b.getMonth();
+    if(m < 0 || (m === 0 && now.getDate() < b.getDate())) a--;
+    return a;
+  };
+  const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const relative = (d) => {
+    const n = Math.round((midnight(d) - midnight(new Date())) / 86400000);
+    if(n === 0) return "今日";
+    if(n === 1) return "明日";
+    if(n === 2) return "あさって";
+    return n > 0 ? "あと" + n + "日" : "";
+  };
+  // カタカナ→ひらがな、全角→半角、区切り文字の除去でゆるく一致させる
+  const norm = (s) => String(s ?? "")
+    .toLowerCase()
+    .replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60))
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+    .replace(/[\s　・、,.\-ー―]/g, "");
+
+  const $ = (id) => document.getElementById(id);
+  const stamp = $("stamp");
+  function setStamp(kind, text){
+    stamp.className = "stamp" + (kind ? " " + kind : "");
+    stamp.innerHTML = '<span class="dot"></span><span>' + esc(text) + '</span>';
+  }
+  function setFigure(id, n, unit){
+    $(id).innerHTML = esc(n) + (unit ? '<span class="unit">' + unit + '</span>' : "");
+  }
+  function say(el, text, bad){
+    el.innerHTML = text ? '<div class="toast' + (bad ? " bad" : "") + '">' + esc(text) + '</div>' : "";
+  }
+
+  /* ---------- タブ ---------- */
+  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+  tabs.forEach(t => t.addEventListener("click", () => {
+    tabs.forEach(x=>{
+      const on = x === t;
+      x.setAttribute("aria-selected", on ? "true" : "false");
+      $(x.getAttribute("aria-controls")).hidden = !on;
+    });
+  }));
+
+  /* ---------- 広報(号) ---------- */
+  function allIssues(){
+    return SEED.koho.concat(store.koho).slice().sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+  }
+  function renderIssues(){
+    const rows = allIssues();
+    setFigure("figIssues", rows.length, "号");
+    $("issueList").innerHTML = rows.length ? rows.map(d =>
+      '<div class="issue-card"><div class="t">' + esc(d.title) + '</div>'
+      + '<div class="d">' + esc(fmtDate(d.date)) + '</div>'
+      + (d.note ? '<div class="n">' + esc(d.note) + '</div>' : '') + '</div>'
+    ).join("") : '<div class="empty">まだ記録がありません。</div>';
+  }
+  $("issueForm").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const title = $("issueTitle").value.trim();
+    const date = $("issueDate").value;
+    if(!title || !date) return;
+    store.koho.push({ id: uid(), title, date, note: $("issueNote").value.trim() });
+    save(); renderIssues();
+    $("issueTitle").value = ""; $("issueNote").value = "";
+    $("issueDate").valueAsDate = new Date();
+  });
+
+  /* ---------- 名簿 ---------- */
+  function renderRoster(){
+    const rows = store.recipients.slice().reverse();
+    setFigure("figRoster", rows.length, "人");
+    $("rosterList").innerHTML = rows.length ? rows.map(d=>{
+      const age = ageOf(d.birthDate);
+      const paren = d.birthDate ? "(" + fmtDate(d.birthDate) + (age !== null ? "・" + age + "歳" : "") + ")"
+                  : (d.birthRaw ? "(" + d.birthRaw + ")" : "");
+      return '<div class="entry"><span class="nm">' + esc(d.name) + '</span>'
+        + (paren ? '<span class="paren">' + esc(paren) + '</span>' : '')
+        + '<button type="button" data-del="' + esc(d.id) + '">削除</button></div>';
+    }).join("") : '<div class="empty">まだ登録がありません。下から追加してください。</div>';
+  }
+  $("rosterList").addEventListener("click",(e)=>{
+    const btn = e.target.closest("button[data-del]");
+    if(!btn) return;
+    store.recipients = store.recipients.filter(r => r.id !== btn.dataset.del);
+    save(); renderRoster();
+  });
+  $("rosterForm").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const name = $("rosterName").value.trim();
+    if(!name) return;
+    store.recipients.push({ id: uid(), name, birthDate: $("rosterBirth").value || null, addedAt: new Date().toISOString() });
+    save(); renderRoster();
+    $("rosterName").value = ""; $("rosterBirth").value = "";
+  });
+
+  function parseCsvLine(line){
+    const cells = [];
+    let cur = "", quoted = false;
+    for(let i=0;i<line.length;i++){
+      const c = line[i];
+      if(quoted){
+        if(c === '"'){ if(line[i+1] === '"'){ cur += '"'; i++; } else quoted = false; }
+        else cur += c;
+      }else{
+        if(c === '"') quoted = true;
+        else if(c === ',') { cells.push(cur); cur = ""; }
+        else cur += c;
+      }
+    }
+    cells.push(cur);
+    return cells.map(s=>s.trim());
+  }
+  // 和暦(H12.3.7 / 平成12年3月7日)・西暦(2000-03-07 / 2000/3/7 / 20000307)のどちらも受け取る
+  const ERA = { M:1867, T:1911, S:1925, H:1988, R:2018,
+                明治:1867, 大正:1911, 昭和:1925, 平成:1988, 令和:2018 };
+  function ymd(y, m, d){
+    y = Number(y); m = Number(m); d = Number(d);
+    if(!y || m < 1 || m > 12 || d < 1 || d > 31) return null;
+    return y + "-" + String(m).padStart(2,"0") + "-" + String(d).padStart(2,"0");
+  }
+  function parseBirth(raw){
+    if(!raw) return null;
+    const s = String(raw).trim()
+      .replace(/[！-～]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+      .replace(/[。]/g, ".")
+      .replace(/[ー―‐]/g, "-")
+      .replace(/[\s　]/g, "");
+    if(!s) return null;
+    const SEP = "[.\\/\\-年月]";
+
+    const wa = s.match(new RegExp("^(明治|大正|昭和|平成|令和|[MTSHRmtshr])\\.?(元|\\d{1,2})" + SEP + "(\\d{1,2})" + SEP + "(\\d{1,2})日?$"));
+    if(wa){
+      const key = /^[A-Za-z]$/.test(wa[1]) ? wa[1].toUpperCase() : wa[1];
+      const base = ERA[key];
+      if(base) return ymd(base + (wa[2] === "元" ? 1 : Number(wa[2])), wa[3], wa[4]);
+    }
+    const sei = s.match(new RegExp("^(\\d{4})" + SEP + "(\\d{1,2})" + SEP + "(\\d{1,2})日?$"));
+    if(sei) return ymd(sei[1], sei[2], sei[3]);
+
+    const packed = s.match(/^(\d{4})(\d{2})(\d{2})$/);
+    if(packed) return ymd(packed[1], packed[2], packed[3]);
+
+    return null;
+  }
+
+  // Excelの日本語CSVはShift_JISのことが多いので、UTF-8で読めなければ切り替える
+  async function readTextFile(file){
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    if(bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF){
+      return new TextDecoder("utf-8").decode(bytes.subarray(3));
+    }
+    try{
+      return new TextDecoder("utf-8", { fatal:true }).decode(bytes);
+    }catch(e){
+      try{ return new TextDecoder("shift_jis").decode(bytes); }
+      catch(e2){ return new TextDecoder("utf-8").decode(bytes); }
+    }
+  }
+
+  $("csvForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const file = $("csvFile").files[0];
+    if(!file) return;
+    try{
+      const text = await readTextFile(file);
+      let rows = text.split(/\r\n|\r|\n/).filter(l=>l.trim()).map(parseCsvLine);
+      if(rows.length && /氏名|名前|name/i.test(rows[0][0] || "")) rows = rows.slice(1);
+      let added = 0, skipped = 0, unread = 0;
+      rows.forEach(([rawName, rawBirth])=>{
+        const name = (rawName || "").trim();
+        if(!name){ skipped++; return; }
+        const birthDate = parseBirth(rawBirth);
+        const rec = { id: uid(), name, birthDate, addedAt: new Date().toISOString() };
+        if(!birthDate && rawBirth && rawBirth.trim()){ rec.birthRaw = rawBirth.trim(); unread++; }
+        store.recipients.push(rec);
+        added++;
+      });
+      save(); renderRoster();
+      say($("csvMsg"), added + "件を名簿に追加しました"
+        + (skipped ? " / " + skipped + "件は氏名が空のため除外" : "")
+        + (unread ? " / " + unread + "件は生年月日を読み取れずそのまま保存" : ""));
+      $("csvFile").value = "";
+    }catch(err){
+      say($("csvMsg"), "取り込めませんでした: " + (err.message || err), true);
+    }
+  });
+
+  /* ---------- 照合 ---------- */
+  function renderChecks(){
+    const rows = store.checks.slice().sort((a,b)=> String(b.checkedAt).localeCompare(String(a.checkedAt)));
+    setFigure("figChecks", rows.length, "件");
+    if(!rows.length){
+      $("checkList").innerHTML = '<div class="empty">まだ照合の記録がありません。</div>';
+      setStamp(null,"この端末に保存");
+      return;
+    }
+    $("checkList").innerHTML = rows.map(d=>{
+      const hits = Array.isArray(d.matches) ? d.matches : [];
+      const hit = hits.length > 0;
+      return '<div class="log' + (hit ? " hit" : "") + '">'
+        + '<div class="head"><span class="issue">' + esc(d.issue || fmtDate(d.date)) + '</span>'
+        + '<span class="verdict">' + (hit ? "該当 " + hits.length + "件" : "該当なし") + '</span></div>'
+        + (hit ? '<div class="hits">' + hits.map(m=>esc(m.name)).join("、") + '</div>' : '')
+        + (hit ? hits.filter(m=>m.snippet).map(m=>'<div class="snip">…' + esc(m.snippet) + '…</div>').join("") : '')
+        + '<div class="sub">' + esc(fmtStamp(d.checkedAt)) + ' 照合 ・ 名簿' + esc(d.rosterSize) + '人'
+        + ' <button type="button" class="del" data-del="' + esc(d.id) + '">削除</button></div>'
+        + '</div>';
+    }).join("");
+    const latest = rows[0];
+    const hit = Array.isArray(latest.matches) && latest.matches.length > 0;
+    setStamp(hit ? "alert" : "calm", (hit ? "直近の照合で該当あり" : "直近の照合では該当なし") + " ・ " + fmtStamp(latest.checkedAt));
+  }
+  $("checkList").addEventListener("click",(e)=>{
+    const btn = e.target.closest("button[data-del]");
+    if(!btn) return;
+    store.checks = store.checks.filter(c => c.id !== btn.dataset.del);
+    save(); renderChecks();
+  });
+  $("matchForm").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const text = $("matchText").value;
+    if(!text.trim()){ say($("matchMsg"),"照合するテキストを貼り付けてください", true); return; }
+    if(!store.recipients.length){ say($("matchMsg"),"先に名簿を登録してください", true); return; }
+    const hay = norm(text);
+    const matches = [];
+    store.recipients.forEach(r=>{
+      const needle = norm(r.name);
+      if(!needle) return;
+      const at = hay.indexOf(needle);
+      if(at >= 0){
+        matches.push({
+          name: r.name,
+          birthDate: r.birthDate || null,
+          snippet: hay.slice(Math.max(0, at - 12), at + needle.length + 24)
+        });
+      }
+    });
+    const rec = {
+      id: uid(),
+      issue: $("matchIssue").value.trim() || "貼り付けたテキスト",
+      date: new Date().toISOString().slice(0,10),
+      checkedAt: new Date().toISOString(),
+      rosterSize: store.recipients.length,
+      matches
+    };
+    store.checks.push(rec);
+    save(); renderChecks();
+    say($("matchMsg"), matches.length
+      ? "該当 " + matches.length + "件:" + matches.map(m=>m.name).join("、")
+      : "名簿の中に該当はありませんでした", matches.length > 0);
+    $("matchText").value = "";
+  });
+
+  /* ---------- PDFの読み取り ---------- */
+  const CMAPS = { "Adobe-Japan1-UCS2": "__CMAP_B64__" };
+  class EmbeddedCMapReaderFactory {
+    async fetch({ name }){
+      const b64 = CMAPS[name];
+      if(!b64) throw new Error("この字形表(" + name + ")は同梱されていません");
+      const bin = atob(b64);
+      const arr = new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+      return { cMapData: arr, compressionType: 1 };
+    }
+  }
+  let workerUrl = null;
+  function pdfWorkerReady(){
+    if(!workerUrl){
+      const src = document.getElementById("pdfWorkerSrc").textContent;
+      workerUrl = URL.createObjectURL(new Blob([src], { type:"text/javascript" }));
+    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+  }
+
+  async function readPdf(file, onPage){
+    pdfWorkerReady();
+    const data = new Uint8Array(await file.arrayBuffer());
+    const doc = await pdfjsLib.getDocument({
+      data, CMapReaderFactory: EmbeddedCMapReaderFactory, cMapPacked: true, isEvalSupported: false
+    }).promise;
+    const pages = [];
+    for(let i=1;i<=doc.numPages;i++){
+      onPage(i, doc.numPages);
+      const tc = await (await doc.getPage(i)).getTextContent();
+      const items = tc.items.filter(it => it.str && it.str.trim());
+      pages.push({
+        no: i,
+        text: items.map(it => it.str).join(" "),
+        items: items.map(it => ({
+          s: it.str.trim(),
+          size: Math.abs(it.transform[0]) || Math.abs(it.transform[1]) || 0,
+          x: it.transform[4],
+          y: it.transform[5]
+        }))
+      });
+    }
+    return pages;
+  }
+
+  // そのページの本文の文字の大きさ(文字数で重みづけした中央値)
+  function medianSize(items){
+    const sizes = [];
+    items.forEach(it => { for(let i=0;i<it.s.length;i++) sizes.push(it.size); });
+    if(!sizes.length) return 0;
+    sizes.sort((a,b)=>a-b);
+    return sizes[Math.floor(sizes.length / 2)];
+  }
+
+  // ふりがなは本文より小さく組まれる。氏名の間に挟まると照合できないので落とす
+  function bodyText(page){
+    const med = medianSize(page.items);
+    if(!med) return page.text;
+    return page.items.filter(it => it.size >= med * 0.7).map(it => it.s).join(" ");
+  }
+
+  // 紙面で大きく組まれている文字を見出しの候補として拾う
+  function headlineCandidates(page){
+    const items = page.items.filter(it => it.s.length >= 2 && !/^[\d\s.,:：、。%-]+$/.test(it.s));
+    if(!items.length) return [];
+    const max = Math.max.apply(null, items.map(i => i.size));
+    const med = medianSize(items);
+    const floor = Math.max(max * 0.72, med * 1.5);
+    if(!max) return [];
+    const merged = [];
+    items.filter(it => it.size >= floor).forEach(it=>{
+      const last = merged[merged.length - 1];
+      const near = last && (
+        (Math.abs(last.y - it.y) < it.size * 0.7 && Math.abs(it.x - last.x) < it.size * 4) ||
+        (Math.abs(last.x - it.x) < it.size * 0.7 && Math.abs(it.y - last.y) < it.size * 4)
+      );
+      if(near && Math.abs(last.size - it.size) < 0.6 && (last.s + it.s).length <= 40){
+        last.s += it.s; last.x = it.x; last.y = it.y;
+      }else{
+        merged.push({ s: it.s, size: it.size, x: it.x, y: it.y });
+      }
+    });
+    const seen = new Set();
+    return merged.map(m => m.s.replace(/[\s　]/g,"")).filter(s=>{
+      if(s.length < 3 || s.length > 40 || seen.has(s)) return false;
+      if(/[。、]/.test(s)) return false;
+      seen.add(s);
+      return true;
+    }).slice(0, 4);
+  }
+
+  const AGE_RE = /[（(]\s*\d{1,3}\s*歳[・･][^）)]{1,12}[）)]/g;
+
+  const han = (s) => String(s).replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
+  const pad = (n) => String(Number(n)).padStart(2, "0");
+
+  // 奥付(最終ページ)の「No.1218 令和８年９月号（令和８年９月２日発行）」から号と発行日を読む
+  function guessIssue(fileName, pages){
+    const order = [];
+    for(let i = pages.length - 1; i >= 0; i--) order.push(pages[i]);
+
+    for(const p of order){
+      const t = han(p.text.replace(/[\s　]/g, ""));
+      const kind = t.match(/令和(\d{1,2})年(\d{1,2})月(おしらせ版|号)/);
+      const pub = t.match(/[（(]令和(\d{1,2})年(\d{1,2})月(\d{1,2})日発行[）)]/);
+      if(!kind && !pub) continue;
+
+      const no = t.match(/(?:No|№)\.?(\d{3,5})/);
+      let title = "広報りくぜんたかた";
+      if(kind) title += " 令和" + Number(kind[1]) + "年" + Number(kind[2]) + "月" + kind[3];
+      if(no) title += "(No." + no[1] + ")";
+
+      let date = "";
+      if(pub) date = (2018 + Number(pub[1])) + "-" + pad(pub[2]) + "-" + pad(pub[3]);
+      else if(kind) date = (2018 + Number(kind[1])) + "-" + pad(kind[2]) + "-01";
+      if(date) return { title, date, from: "奥付(" + p.no + "ページ)から取得" };
+    }
+
+    const fm = fileName.match(/(20\d{2})[-_.]?(\d{2})[-_.]?(\d{2})?/);
+    if(fm){
+      return {
+        title: "広報りくぜんたかた 令和" + (Number(fm[1]) - 2018) + "年" + Number(fm[2]) + "月号",
+        date: fm[1] + "-" + fm[2] + "-" + (fm[3] || "01"),
+        from: "ファイル名からの推測"
+      };
+    }
+    return { title: "広報りくぜんたかた", date: "", from: "自動では判別できませんでした" };
+  }
+
+  let readResult = null;
+  $("pdfForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const file = $("pdfFile").files[0];
+    if(!file) return;
+    const btn = e.target.querySelector("button");
+    btn.disabled = true;
+    $("pdfResult").innerHTML = "";
+    try{
+      $("pdfMsg").innerHTML = '<div class="toast busy">読み取りを始めます…</div>';
+      const pages = await readPdf(file, (i,n)=>{
+        $("pdfMsg").innerHTML = '<div class="toast busy">' + i + '/' + n + 'ページを読み取り中…</div>';
+      });
+      const fullText = pages.map(p=>p.text).join("\n");
+      const guess = guessIssue(file.name, pages);
+      const obits = fullText.match(AGE_RE) || [];
+
+      // ふりがなを除いた本文と、全文の両方を照合対象にする
+      const hays = [norm(pages.map(bodyText).join("\n")), norm(fullText)];
+      const matches = [];
+      store.recipients.forEach(r=>{
+        const needle = norm(r.name);
+        if(!needle) return;
+        for(const hay of hays){
+          const at = hay.indexOf(needle);
+          if(at >= 0){
+            matches.push({ name: r.name, snippet: hay.slice(at, at + needle.length + 14) });
+            break;
+          }
+        }
+      });
+
+      const heads = [];
+      pages.forEach(p => headlineCandidates(p).forEach(s => heads.push({ page: String(p.no), title: s })));
+
+      readResult = { file: file.name, pages: pages.length, guess, obits: obits.length, matches, heads };
+      renderReadout();
+      say($("pdfMsg"), pages.length + "ページを読み取りました");
+    }catch(err){
+      say($("pdfMsg"), "読み取れませんでした: " + (err.message || err), true);
+    }finally{ btn.disabled = false; }
+  });
+
+  function renderReadout(){
+    const r = readResult;
+    if(!r){ $("pdfResult").innerHTML = ""; return; }
+    const hit = r.matches.length > 0;
+    $("pdfResult").innerHTML =
+      '<div class="readout"><h3>読み取り結果</h3>'
+      + '<div class="sub">' + esc(r.file) + ' ・ 全' + r.pages + 'ページ'
+        + (r.obits ? ' ・ 「(NN歳・字名)」形式の記載 ' + r.obits + '件' : '') + '</div>'
+      + '<div class="fields">'
+        + '<input type="text" id="roTitle" value="' + esc(r.guess.title) + '" maxlength="80" aria-label="号の名前">'
+        + '<input type="date" id="roDate" value="' + esc(r.guess.date) + '" aria-label="発行日">'
+      + '</div>'
+      + '<div class="hint">' + esc(r.guess.from || "自動判別") + '。必要に応じて直してください。</div>'
+      + '<div class="found' + (hit ? " hit" : "") + '">'
+        + (!store.recipients.length ? "名簿が空のため照合していません"
+           : hit ? "名簿と照合 → 該当 " + r.matches.length + "件:" + r.matches.map(m=>m.name).join("、")
+                 : "名簿" + store.recipients.length + "人と照合 → 該当はありませんでした")
+      + '</div>'
+      + (r.heads.length
+          ? '<div><div class="sub" style="margin-bottom:5px;">見出しの候補(保存するものにチェック)</div>'
+            + '<div class="head-pick">' + r.heads.map((h,i)=>
+                '<label><input type="checkbox" data-head="' + i + '" checked>'
+                + '<span class="pg">p' + esc(h.page) + '</span><span>' + esc(h.title) + '</span></label>'
+              ).join("") + '</div></div>'
+          : '<div class="sub">見出しの候補は見つかりませんでした。</div>')
+      + '<button type="button" class="go" id="roSave">この内容で保存する</button>'
+      + '<div id="roMsg"></div></div>';
+
+    $("roSave").addEventListener("click", ()=>{
+      const title = $("roTitle").value.trim();
+      const date = $("roDate").value;
+      if(!title || !date){ say($("roMsg"), "号の名前と発行日を入れてください", true); return; }
+
+      const picked = Array.from(document.querySelectorAll("[data-head]"))
+        .filter(cb => cb.checked)
+        .map(cb => r.heads[Number(cb.dataset.head)]);
+
+      store.koho.push({ id: uid(), title, date,
+        note: "PDFから取り込み(全" + r.pages + "ページ)" + (r.obits ? " / 慶弔欄らしき記載 " + r.obits + "件" : "") });
+
+      if(picked.length){
+        store.headlines = store.headlines.filter(h => !(h.issue === title && h.date === date));
+        store.headlines.push({ id: uid(), issue: title, date, items: picked });
+      }
+      if(store.recipients.length){
+        store.checks.push({ id: uid(), issue: title, date,
+          checkedAt: new Date().toISOString(), rosterSize: store.recipients.length, matches: r.matches });
+      }
+      save();
+      renderIssues(); renderToc(); renderChecks();
+      readResult = null;
+      $("pdfResult").innerHTML = "";
+      $("pdfFile").value = "";
+      say($("pdfMsg"), "保存しました(見出し" + picked.length + "件"
+        + (store.recipients.length ? " / 照合記録も追加" : "") + ")");
+    });
+  }
+
+  /* ---------- 見出し ---------- */
+  function renderToc(){
+    const rows = SEED.headlines.concat(store.headlines).slice().sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+    $("tocList").innerHTML = rows.length ? rows.map(d=>
+      '<section class="toc-issue"><h3 class="toc-title">' + esc(d.issue)
+      + '<span class="toc-date">' + esc(fmtDate(d.date)) + '発行</span></h3><ol>'
+      + (d.items || []).map(it =>
+          '<li><span class="pg">' + esc(it.page ?? "―") + '</span><span class="ttl">' + esc(it.title)
+          + (it.sup ? '<span class="sup">' + esc(it.sup) + '</span>' : '') + '</span></li>'
+        ).join("")
+      + '</ol></section>'
+    ).join("") : '<div class="empty">見出しの登録がありません。</div>';
+  }
+
+  /* ---------- ごみ ---------- */
+  function nextWeekly(weekdays){
+    if(!Array.isArray(weekdays) || !weekdays.length) return null;
+    const today = midnight(new Date());
+    for(let i=0;i<8;i++){
+      const d = new Date(today.getFullYear(), today.getMonth(), today.getDate()+i);
+      if(weekdays.includes(d.getDay())) return d;
+    }
+    return null;
+  }
+  function renderGomi(){
+    const d = SEED.gomi.slice().sort((a,b)=> String(b.month).localeCompare(String(a.month)))[0];
+    if(!d){ $("gomiBody").innerHTML = '<div class="empty">ごみ収集日の登録がありません。</div>'; return; }
+    const today = midnight(new Date());
+    const upcoming = [];
+    const weekly = nextWeekly(d.burnable && d.burnable.weekdays);
+    if(weekly) upcoming.push({ kind:"燃えるごみ", date: weekly });
+    const spots = (d.spot || []).map(s => ({ kind: s.type, date: toDate(s.date) })).filter(s => s.date);
+    spots.forEach(s => { if(s.date >= today) upcoming.push(s); });
+    upcoming.sort((a,b)=> a.date - b.date);
+    const next = upcoming[0];
+    setFigure("figGomi", next ? next.kind : "―", next ? " " + fmtMD(next.date) : "");
+
+    const rows = [{
+      kind:"燃えるごみ",
+      when:(d.burnable && d.burnable.label ? d.burnable.label : "―") + (weekly ? " ・ 次は" + fmtMD(weekly) : ""),
+      soon: weekly ? relative(weekly) : ""
+    }];
+    spots.forEach(s=>{
+      const past = s.date < today;
+      rows.push({ kind: s.kind, when: fmtMD(s.date) + (past ? " (済)" : ""), soon: past ? "" : relative(s.date) });
+    });
+
+    $("gomiBody").innerHTML =
+      (next ? '<div class="next-pickup"><span class="kicker">高田町8区・次の収集</span>'
+        + '<span class="what">' + esc(next.kind) + '</span>'
+        + '<span class="when">' + esc(fmtMD(next.date) + " " + relative(next.date)) + '</span></div>' : '')
+      + '<div class="gomi-rows">' + rows.map(r =>
+          '<div class="gomi-row"><span class="kind">' + esc(r.kind) + '</span>'
+          + '<span class="when">' + esc(r.when) + '</span>'
+          + (r.soon ? '<span class="soon">' + esc(r.soon) + '</span>' : '') + '</div>'
+        ).join("") + '</div>'
+      + (d.caveat ? '<div class="notice"><strong>' + esc(d.caveat) + '</strong></div>' : '')
+      + (d.rule ? '<div class="notice">' + esc(d.rule) + '</div>' : '')
+      + '<div class="source">' + (d.month ? esc(d.month.replace("-","年") + "月分") + ' ・ ' : '')
+        + (d.contact ? '問い合わせ先:' + esc(d.contact) + '<br>' : '')
+        + (d.source ? '出典:' + esc(d.source) : '') + '</div>';
+  }
+
+  /* ---------- 分別早見表 ---------- */
+  const toneByCat = {};
+  SEED.bunbetsu.forEach(c => { toneByCat[c.name] = c.tone || "gray"; });
+  function renderCats(){
+    $("bunbetsuCats").innerHTML = SEED.bunbetsu.slice().sort((a,b)=>a.order-b.order).map(c=>{
+      const line = (cls, arr) => (arr || []).map(t => '<li class="' + cls + '">' + esc(t) + '</li>').join("");
+      return '<div class="cat-card"><div class="cat-head">'
+        + '<span class="cat-chip ' + esc(c.tone || "gray") + '">' + esc(c.name) + '</span>'
+        + (c.freq ? '<span class="freq">' + esc(c.freq) + '</span>' : '') + '</div>'
+        + '<ul>' + line("ok", c.ok) + line("ng", c.ng) + line("tip", c.tips) + '</ul></div>';
+    }).join("");
+  }
+  function renderSearch(){
+    const q = norm($("bunbetsuQ").value);
+    const el = $("bunbetsuResult");
+    if(!q){ el.innerHTML = ""; return; }
+    const hits = SEED.gomiItems.items.filter(it =>
+      norm(it.name + " " + (it.kana || "") + " " + (it.keywords || "")).includes(q)
+    ).slice(0, 14);
+    el.innerHTML = hits.length
+      ? '<div class="hits-head">' + hits.length + '件</div>' + hits.map(it =>
+          '<div class="hit-row"><span class="item">' + esc(it.name) + '</span>'
+          + '<span class="cat-chip ' + esc(toneByCat[it.category] || "gray") + '">' + esc(it.category) + '</span>'
+          + (it.inferred ? '<span class="guess">推定</span>' : '')
+          + (it.note ? '<span class="note">' + esc(it.note) + '</span>' : '') + '</div>'
+        ).join("")
+      : '<div class="empty">該当する品目が見つかりませんでした。市ホームページの50音順一覧表もご確認ください。</div>';
+  }
+  $("bunbetsuQ").addEventListener("input", renderSearch);
+
+  /* ---------- 保存と復元 ---------- */
+  $("exportBtn").addEventListener("click",()=>{
+    const body = JSON.stringify({ app:"koho-app", version:1, exportedAt:new Date().toISOString(), data:store }, null, 1);
+    const url = URL.createObjectURL(new Blob([body], {type:"application/json"}));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "koho-app-backup-" + new Date().toISOString().slice(0,10) + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    say($("backupMsg"), "書き出しました");
+  });
+  $("importFile").addEventListener("change", async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    try{
+      const parsed = JSON.parse(await file.text());
+      const data = parsed && parsed.data ? parsed.data : parsed;
+      if(!data || !Array.isArray(data.recipients)) throw new Error("形式が違います");
+      store = Object.assign({}, blank, data);
+      save();
+      renderRoster(); renderChecks(); renderIssues(); renderToc();
+      say($("backupMsg"), "読み込みました(名簿" + store.recipients.length + "人・照合" + store.checks.length + "件)");
+    }catch(err){
+      say($("backupMsg"), "読み込めませんでした: " + (err.message || err), true);
+    }
+    e.target.value = "";
+  });
+
+  /* ---------- 初期表示 ---------- */
+  $("issueDate").valueAsDate = new Date();
+  renderIssues(); renderRoster(); renderChecks(); renderToc(); renderGomi(); renderCats();
+})();
+</script>
+</body>
+</html>
