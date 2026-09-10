@@ -136,9 +136,12 @@ h1,h2,h3{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;margin:0;text-w
 .log button.del{border:none;background:none;color:var(--muted);cursor:pointer;font-size:.71rem;padding:2px 6px;}
 
 .issue-card{border:1px solid var(--line);border-radius:12px;padding:10px 13px;background:var(--surface-2);}
+.issue-card .head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
 .issue-card .t{font-weight:500;font-size:.9rem;font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;}
 .issue-card .d{font-size:.73rem;color:var(--muted);margin-top:1px;}
 .issue-card .n{font-size:.82rem;margin-top:5px;white-space:pre-wrap;color:var(--ink-soft);}
+.issue-card button.del{border:none;background:none;color:var(--muted);cursor:pointer;font-size:.73rem;padding:3px 6px;border-radius:6px;flex:none;}
+.issue-card button.del:hover{color:var(--coral);background:var(--coral-soft);}
 
 .toc{display:flex;flex-direction:column;gap:15px;}
 .toc-issue .toc-title{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;font-weight:700;font-size:.96rem;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
@@ -373,7 +376,7 @@ button.ghost{
   const WD = ["日","月","火","水","木","金","土"];
 
   /* ---------- 保存 ---------- */
-  const blank = { recipients: [], checks: [], koho: [], headlines: [] };
+  const blank = { recipients: [], checks: [], koho: [], headlines: [], hiddenSeedIssues: [] };
   let store = blank;
   try{
     const raw = localStorage.getItem(KEY);
@@ -458,17 +461,37 @@ button.ghost{
 
   /* ---------- 広報(号) ---------- */
   function allIssues(){
-    return SEED.koho.concat(store.koho).slice().sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+    const seed = SEED.koho.filter(d => !store.hiddenSeedIssues.includes(d.id)).map(d => Object.assign({ kind:"seed" }, d));
+    const local = store.koho.map(d => Object.assign({ kind:"local" }, d));
+    return seed.concat(local).sort((a,b)=> String(b.date).localeCompare(String(a.date)));
   }
   function renderIssues(){
     const rows = allIssues();
     setFigure("figIssues", rows.length, "号");
     $("issueList").innerHTML = rows.length ? rows.map(d =>
-      '<div class="issue-card"><div class="t">' + esc(d.title) + '</div>'
+      '<div class="issue-card"><div class="head"><span class="t">' + esc(d.title) + '</span>'
+      + '<button type="button" class="del" data-kind="' + esc(d.kind) + '" data-id="' + esc(d.id) + '">削除</button></div>'
       + '<div class="d">' + esc(fmtDate(d.date)) + '</div>'
       + (d.note ? '<div class="n">' + esc(d.note) + '</div>' : '') + '</div>'
     ).join("") : '<div class="empty">まだ記録がありません。</div>';
   }
+  $("issueList").addEventListener("click",(e)=>{
+    const btn = e.target.closest("button[data-id]");
+    if(!btn) return;
+    const rows = allIssues();
+    const target = rows.find(r => r.id === btn.dataset.id && r.kind === btn.dataset.kind);
+    if(!target) return;
+    if(!confirm('「' + target.title + '」を削除しますか?この号に紐づく見出し案内も削除されます(照合記録は残ります)。')) return;
+
+    if(target.kind === "local"){
+      store.koho = store.koho.filter(d => d.id !== target.id);
+    }else{
+      store.hiddenSeedIssues.push(target.id);
+    }
+    store.headlines = store.headlines.filter(h => !(h.issue === target.title && h.date === target.date));
+
+    save(); renderIssues(); renderToc();
+  });
   $("issueForm").addEventListener("submit",(e)=>{
     e.preventDefault();
     const title = $("issueTitle").value.trim();
@@ -899,7 +922,8 @@ button.ghost{
 
   /* ---------- 見出し ---------- */
   function renderToc(){
-    const rows = SEED.headlines.concat(store.headlines).slice().sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+    const seed = SEED.headlines.filter(h => !store.hiddenSeedIssues.includes(h.id));
+    const rows = seed.concat(store.headlines).slice().sort((a,b)=> String(b.date).localeCompare(String(a.date)));
     $("tocList").innerHTML = rows.length ? rows.map(d=>
       '<section class="toc-issue"><h3 class="toc-title">' + esc(d.issue)
       + '<span class="toc-date">' + esc(fmtDate(d.date)) + '発行</span></h3><ol>'
