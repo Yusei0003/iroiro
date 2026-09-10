@@ -2,7 +2,7 @@
 
 陸前高田市広報の取り込み・受給者名簿との照合・見出し案内・高田町8区のごみ収集日/分別早見表をまとめた、単体で動くWebアプリ。
 
-**`dist/koho-app.html` を開けば、そのまま(ネット接続なしで)動きます。** ブラウザ内の保存(localStorage)にのみデータが残り、外部には一切送信されません。
+**`koho-app.html` を開けば、そのまま(ネット接続なしで)動きます。** ブラウザ内の保存(localStorage)にのみデータが残り、外部には一切送信されません。
 
 ## 構成
 
@@ -16,8 +16,8 @@ webapp/
     headlines.json         各号の見出し案内
     gomi-schedule.json     高田町8区のごみ収集日(月ごと)
   vendor/pdfjs/           PDF読み取り用に同梱している pdf.js 一式(vendor、変更しない)
-  build.py                上記を組み合わせて dist/koho-app.html を生成するビルドスクリプト
-  dist/koho-app.html      配布用の完成ファイル(build.py の出力。手で編集しない)
+  build.py                上記を組み合わせて koho-app.html を生成するビルドスクリプト
+  koho-app.html           配布用の完成ファイル(build.py の出力。手で編集しない)
 ```
 
 ## ビルド方法
@@ -27,9 +27,9 @@ cd webapp
 python3 build.py
 ```
 
-外部ネットワークへのアクセスは不要。`dist/koho-app.html` が生成される。
+外部ネットワークへのアクセスは不要。`koho-app.html` が生成される。
 
-`src/template.html` や `seed/*` を直したら、必ず `python3 build.py` を実行してから `dist/koho-app.html` をコミットすること(dist は生成物なので、テンプレートやseedと食い違わないようにする)。
+`src/template.html` や `seed/*` を直したら、必ず `python3 build.py` を実行してから `koho-app.html` をコミットすること(koho-app.html は生成物なので、テンプレートやseedと食い違わないようにする)。
 
 ## データの更新
 

@@ -58,7 +58,7 @@ def main():
             raise SystemExit(f"テンプレートにプレースホルダーが見つかりません: {key}")
         html = html.replace(key, value)
 
-    out_path = os.path.join(ROOT, "dist/koho-app.html")
+    out_path = os.path.join(ROOT, "koho-app.html")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
