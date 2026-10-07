@@ -5,8 +5,8 @@
     python3 build.py
 
 webapp/src/template.html に、webapp/seed/ 以下のデータと
-webapp/vendor/pdfjs/ の pdf.js 一式を埋め込み、
-webapp/dist/koho-app.html を生成する。
+webapp/vendor/pdfjs/ の pdf.js 一式、webapp/vendor/fonts/ の見出し用フォントを埋め込み、
+webapp/koho-app.html を生成する。
 外部ネットワークへのアクセスは不要(すべてこのリポジトリ内のファイルで完結する)。
 """
 import base64
@@ -25,6 +25,20 @@ def read(path):
 def read_json(path):
     with open(os.path.join(ROOT, path), encoding="utf-8") as f:
         return json.load(f)
+
+
+def font_faces():
+    """vendor/fonts/fonts.json の一覧から、フォントを埋め込んだ @font-face を作る。"""
+    faces = []
+    for f in read_json("vendor/fonts/fonts.json"):
+        with open(os.path.join(ROOT, "vendor/fonts", f["file"]), "rb") as fh:
+            b64 = base64.b64encode(fh.read()).decode()
+        faces.append(
+            '@font-face{font-family:"Koho Rounded";font-weight:%d;font-display:swap;'
+            'src:url(data:font/woff2;base64,%s) format("woff2");unicode-range:%s;}'
+            % (f["weight"], b64, f["unicodeRange"])
+        )
+    return "\n".join(faces)
 
 
 def main():
@@ -52,6 +66,7 @@ def main():
         "__PDFJS_LIB__": lib,
         "__PDFJS_WORKER__": worker,
         "__CMAP_B64__": cmap_b64,
+        "__FONT_FACES__": font_faces(),
     }
     for key, value in parts.items():
         if key not in html:

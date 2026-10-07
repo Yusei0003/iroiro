@@ -2,3 +2,4 @@ node_modules/
 *.png
 pdftest/
 pdftest2dir/
+__pycache__/

@@ -2,13 +2,15 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="広報取り込み">
 <meta name="theme-color" content="#1487c4">
 <title>広報取り込みアプリ</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
 <style>
+/* 見出し用の丸ゴシック(M PLUS Rounded 1c を使う文字だけに絞って同梱。オフラインでも同じ見た目になる) */
+__FONT_FACES__
 :root{
   --paper:#edf3fa; --surface:#ffffff; --surface-2:#f6f9fd;
   --ink:#16324a; --ink-soft:#3f5a70; --muted:#7f93a6;
@@ -80,7 +82,7 @@ body{
 img{max-width:100%;}
 [hidden]{display:none !important;}
 .sheet{max-width:1060px;margin:0 auto;padding:22px 16px 60px;display:flex;flex-direction:column;gap:16px;}
-h1,h2,h3{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;margin:0;text-wrap:balance;}
+h1,h2,h3{font-family:"Koho Rounded","Noto Sans JP",sans-serif;margin:0;text-wrap:balance;}
 
 .masthead{
   display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
@@ -98,8 +100,8 @@ h1,h2,h3{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;margin:0;text
 
 .tabs{display:flex;gap:4px;background:var(--surface);border-radius:18px;padding:6px;box-shadow:var(--shadow);}
 .tabs button{
-  flex:1;white-space:nowrap;
-  font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;
+  flex:1;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  font-family:"Koho Rounded","Noto Sans JP",sans-serif;
   font-size:.9rem;font-weight:700;letter-spacing:.03em;
   padding:11px 12px;border-radius:13px;
   border:none;background:transparent;color:var(--muted);cursor:pointer;
@@ -107,6 +109,24 @@ h1,h2,h3{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;margin:0;text
 .tabs button:hover{color:var(--ink);}
 .tabs button[aria-selected="true"]{background:var(--grad);color:#fff;box-shadow:0 8px 18px -10px #1487c4;}
 .tabs button:focus-visible{outline:2px solid var(--sky-deep);outline-offset:2px;}
+.tabs svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+.tabs .ts{display:none;}
+
+/* お知らせ(いま確認が必要なこと) */
+.alerts{display:flex;flex-direction:column;gap:8px;}
+.alert-item{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  font:inherit;font-size:.86rem;color:var(--ink);cursor:pointer;
+  background:var(--surface);border:none;border-left:5px solid var(--sky);border-radius:16px;
+  box-shadow:var(--shadow);padding:11px 14px;
+}
+.alert-item:hover{filter:brightness(.985);}
+.alert-item .tag{flex:none;font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-size:.72rem;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--sky-soft);color:var(--sky-deep);}
+.alert-item .txt{flex:1;min-width:0;}
+.alert-item .go-arrow{flex:none;color:var(--muted);font-size:1.2rem;line-height:1;}
+.alert-item.coral{border-left-color:var(--coral);} .alert-item.coral .tag{background:var(--coral-soft);color:var(--coral);}
+.alert-item.sand{border-left-color:var(--sand);} .alert-item.sand .tag{background:var(--sand-soft);color:var(--sand);}
+.alert-item.calm{border-left-color:var(--leaf);cursor:default;} .alert-item.calm .tag{background:var(--leaf-soft);color:var(--leaf-deep);}
 
 .figures{margin-top:-34px;position:relative;z-index:1;}
 .figures h2{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
@@ -114,7 +134,7 @@ h1,h2,h3{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;margin:0;text
 .figures .col{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);padding:12px 16px;}
 .figures .label{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:6px;}
 .figures .label::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--grad);}
-.figures .value{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;font-size:1.7rem;font-weight:800;line-height:1.3;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.figures .value{font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-size:1.7rem;font-weight:800;line-height:1.3;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
 .figures .value .unit{font-size:.78rem;font-weight:500;-webkit-text-fill-color:var(--muted);margin-left:3px;display:inline-block;white-space:nowrap;}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start;gap:16px;}
@@ -122,7 +142,7 @@ h1,h2,h3{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;margin:0;text
 .panel.wide{grid-column:1/-1;}
 .band{
   border-radius:14px;padding:8px 16px;text-align:center;
-  font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;
+  font-family:"Koho Rounded","Noto Sans JP",sans-serif;
   font-weight:700;font-size:.98rem;letter-spacing:.35em;text-indent:.35em;color:var(--on-accent);
 }
 .band.sky{background:var(--grad-sky);} .band.rose{background:var(--grad-rose);}
@@ -130,6 +150,7 @@ h1,h2,h3{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;margin:0;text
 .panel .desc{font-size:.78rem;color:var(--muted);text-align:center;margin-top:-5px;}
 
 .list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;}
+.list.tall{max-height:560px;}
 .empty{color:var(--muted);font-size:.84rem;text-align:center;padding:18px 8px;border:2px dotted var(--line-strong);border-radius:12px;}
 
 .entry{display:flex;align-items:baseline;gap:10px;padding:8px 10px;border-bottom:1px dotted var(--line-strong);}
@@ -147,30 +168,49 @@ h1,h2,h3{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;margin:0;text
 .log.hit .verdict{color:var(--coral);}
 .log .hits{font-size:.82rem;margin-top:3px;}
 .log .snip{font-size:.75rem;color:var(--ink-soft);margin-top:3px;word-break:break-all;}
+.log.warn{border-left-color:var(--sand);background:var(--sand-soft);}
+.log.warn .verdict{color:var(--sand);}
+.log.neutral{border-left-color:var(--line-strong);background:var(--surface-2);}
+.log.neutral .verdict{color:var(--muted);}
+.log .cov{font-size:.78rem;color:var(--ink-soft);margin-top:3px;}
+.log button.del.ok{color:var(--sand);font-weight:700;}
+/* 照合で名前が一致した方 */
+.m-row{background:var(--surface);border-radius:10px;padding:8px 11px;margin-top:7px;}
+.m-row.done{opacity:.6;}
+.m-row.done .m-name{text-decoration:line-through;}
+.m-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.m-name{font-weight:700;letter-spacing:.06em;}
+.lv{font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-size:.7rem;font-weight:700;padding:1px 9px;border-radius:999px;}
+.lv.coral{background:var(--coral);color:#fff;}
+.lv.sand{background:var(--sand-soft);color:var(--sand);border:1px solid var(--sand);}
+.lv.gray{background:var(--line);color:var(--ink-soft);}
+.m-sub{font-size:.74rem;color:var(--muted);margin-top:2px;}
+.done-check{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:500;margin-top:5px;cursor:pointer;}
+.done-check input{flex:none;min-width:0;width:17px;height:17px;accent-color:var(--leaf);}
 .log .sub{font-size:.71rem;color:var(--muted);margin-top:2px;}
 .log button.del{border:none;background:none;color:var(--muted);cursor:pointer;font-size:.71rem;padding:2px 6px;}
 
 .issue-card{border:1px solid var(--line);border-radius:16px;padding:10px 13px;background:var(--surface-2);}
 .issue-card .head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
-.issue-card .t{font-weight:500;font-size:.9rem;font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;}
+.issue-card .t{font-weight:500;font-size:.9rem;font-family:"Koho Rounded","Noto Sans JP",sans-serif;}
 .issue-card .d{font-size:.73rem;color:var(--muted);margin-top:1px;}
 .issue-card .n{font-size:.82rem;margin-top:5px;white-space:pre-wrap;color:var(--ink-soft);}
 .issue-card button.del{border:none;background:none;color:var(--muted);cursor:pointer;font-size:.73rem;padding:3px 6px;border-radius:6px;flex:none;}
 .issue-card button.del:hover{color:var(--coral);background:var(--coral-soft);}
 
 .toc{display:flex;flex-direction:column;gap:15px;}
-.toc-issue .toc-title{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;font-weight:700;font-size:.96rem;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.toc-issue .toc-title{font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-weight:700;font-size:.96rem;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
 .toc-issue .toc-date{font-size:.74rem;color:var(--muted);font-weight:400;}
 .toc-issue ol{list-style:none;margin:9px 0 0;padding:0;display:flex;flex-direction:column;}
 .toc-issue li{display:flex;gap:11px;align-items:baseline;padding:7px 3px;border-bottom:1px dotted var(--line-strong);font-size:.87rem;}
 .toc-issue li:last-child{border-bottom:none;}
-.toc-issue .pg{flex:none;width:26px;height:26px;border-radius:50%;background:var(--sky-soft);color:var(--sky-deep);display:grid;place-items:center;font-size:.71rem;font-weight:700;font-family:"M PLUS Rounded 1c",sans-serif;}
+.toc-issue .pg{flex:none;width:26px;height:26px;border-radius:50%;background:var(--sky-soft);color:var(--sky-deep);display:grid;place-items:center;font-size:.71rem;font-weight:700;font-family:"Koho Rounded",sans-serif;}
 .toc-issue .ttl{flex:1;min-width:0;}
 .toc-issue .ttl .sup{display:block;font-size:.73rem;color:var(--muted);}
 
 .next-pickup{border-radius:14px;background:var(--sand-soft);padding:16px 18px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 15px;}
 .next-pickup .kicker{font-size:.77rem;color:var(--muted);width:100%;}
-.next-pickup .what{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;font-size:1.45rem;font-weight:700;color:var(--ink);}
+.next-pickup .what{font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-size:1.45rem;font-weight:700;color:var(--ink);}
 .next-pickup .when{font-size:.98rem;font-weight:500;color:var(--sand);}
 .gomi-rows{display:flex;flex-direction:column;}
 .gomi-row{display:flex;align-items:baseline;gap:11px;padding:9px 3px;border-bottom:1px dotted var(--line-strong);}
@@ -190,7 +230,7 @@ input[type="search"]{flex:1;font-size:.95rem;padding:11px 14px;border-radius:999
 .hit-row:last-child{border-bottom:none;}
 .hit-row .item{font-weight:500;font-size:.91rem;}
 .hit-row .note{font-size:.77rem;color:var(--muted);flex-basis:100%;}
-.cat-chip{font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;font-size:.74rem;font-weight:700;padding:2px 12px;border-radius:999px;white-space:nowrap;}
+.cat-chip{font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-size:.74rem;font-weight:700;padding:2px 12px;border-radius:999px;white-space:nowrap;}
 .cat-chip.coral{background:var(--coral-soft);color:var(--coral);}
 .cat-chip.sky{background:var(--sky-soft);color:var(--sky-deep);}
 .cat-chip.leaf{background:var(--leaf-soft);color:var(--leaf-deep);}
@@ -210,18 +250,47 @@ input[type="search"]{flex:1;font-size:.95rem;padding:11px 14px;border-radius:999
 
 form{display:flex;flex-direction:column;gap:9px;padding-top:12px;border-top:1px dotted var(--line-strong);}
 form .fields{display:flex;gap:8px;flex-wrap:wrap;}
-.chip-label{display:inline-block;align-self:flex-start;font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;font-size:.78rem;font-weight:700;padding:3px 14px;border-radius:999px;}
+.chip-label{display:inline-block;align-self:flex-start;font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-size:.78rem;font-weight:700;padding:3px 14px;border-radius:999px;}
 .chip-label.leaf{background:var(--leaf-soft);color:var(--leaf-deep);}
 .chip-label.rose{background:var(--rose-soft);color:var(--rose-deep);}
 .chip-label.sky{background:var(--sky-soft);color:var(--sky-deep);}
 .chip-label.sand{background:var(--sand-soft);color:var(--sand);}
 input,textarea{font:inherit;font-size:.85rem;padding:8px 11px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface-2);color:var(--ink);flex:1;min-width:130px;}
-input[type="file"]{padding:6px 9px;font-size:.79rem;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+/* PDFの取り込みエリア */
+.drop{
+  display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;cursor:pointer;
+  border:2px dashed var(--line-strong);border-radius:22px;background:var(--surface-2);padding:26px 18px 24px;
+  transition:border-color .15s,background .15s;
+}
+.drop:hover,.drop.drag{border-color:var(--sky);background:var(--sky-soft);}
+.drop:focus-within{outline:2px solid var(--sky);outline-offset:2px;}
+.drop.busy{opacity:.6;pointer-events:none;}
+.drop-icon{width:52px;height:52px;border-radius:50%;background:var(--grad);display:grid;place-items:center;box-shadow:0 10px 22px -12px #1487c4;}
+.drop-icon svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.drop-main{font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-size:1.08rem;font-weight:800;color:var(--ink);}
+.drop-sub{font-size:.78rem;color:var(--muted);}
+.file-btn{
+  display:inline-flex;align-items:center;gap:7px;align-self:flex-start;cursor:pointer;
+  font:inherit;font-size:.82rem;font-weight:500;padding:8px 16px;
+  border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--ink-soft);
+}
+.file-btn:hover{border-color:var(--sky);color:var(--sky-deep);}
+.file-btn:focus-within{outline:2px solid var(--sky);outline-offset:1px;}
+.file-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+/* 普段は使わない手動入力 */
+details.manual{border-top:1px dotted var(--line-strong);padding-top:10px;}
+details.manual summary{cursor:pointer;font-size:.82rem;font-weight:500;color:var(--sky-deep);list-style:none;display:flex;align-items:center;gap:6px;}
+details.manual summary::-webkit-details-marker{display:none;}
+details.manual summary::before{content:"＋";font-weight:700;}
+details.manual[open] summary::before{content:"−";}
+details.manual form{border-top:none;padding-top:10px;}
 textarea{resize:vertical;min-height:56px;width:100%;}
 input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--sky);outline-offset:1px;}
 .hint{font-size:.72rem;color:var(--muted);}
+.hint.center{text-align:center;margin-top:-4px;}
 button.go{
-  align-self:flex-start;font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;
+  align-self:flex-start;font-family:"Koho Rounded","Noto Sans JP",sans-serif;
   font-size:.85rem;font-weight:700;letter-spacing:.04em;padding:10px 24px;
   border:none;border-radius:999px;background:var(--grad);color:var(--on-accent);cursor:pointer;
   box-shadow:0 8px 18px -10px #1487c4;
@@ -243,22 +312,37 @@ button.ghost{
 .readout .fields{display:flex;gap:8px;flex-wrap:wrap;}
 .readout .sub{font-size:.76rem;color:var(--muted);}
 .readout .found{font-size:.85rem;border-radius:10px;padding:9px 12px;background:var(--leaf-soft);color:var(--leaf-deep);}
-.readout .found.hit{background:var(--coral-soft);color:var(--coral);font-weight:500;}
+.readout .found.hit{background:var(--coral-soft);color:var(--coral);}
+.readout .found.warn{background:var(--sand-soft);color:var(--ink);border:1px solid var(--sand);}
+.readout .found.neutral{background:var(--surface);color:var(--ink-soft);}
+.readout .found strong{display:block;font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-size:1.05rem;font-weight:800;}
+.readout .mlist .m-row{border:1px solid var(--line);}
 .head-pick{display:flex;flex-direction:column;gap:2px;max-height:260px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);}
 .head-pick label{display:flex;gap:9px;align-items:flex-start;font-size:.83rem;padding:4px 2px;cursor:pointer;}
 .head-pick input{flex:none;min-width:0;margin-top:5px;}
 .head-pick .pg{flex:none;font-size:.72rem;color:var(--muted);min-width:2.6em;}
 
 .colophon{display:flex;align-items:flex-start;gap:12px;color:var(--muted);font-size:.74rem;line-height:1.7;padding:0 6px;}
-.colophon .page-no{flex:none;width:30px;height:30px;border-radius:50%;background:var(--grad);color:var(--on-accent);display:grid;place-items:center;font-family:"M PLUS Rounded 1c",sans-serif;font-weight:700;font-size:.8rem;}
+.colophon .page-no{flex:none;width:30px;height:30px;border-radius:50%;background:var(--grad);color:var(--on-accent);display:grid;place-items:center;font-family:"Koho Rounded",sans-serif;font-weight:700;font-size:.8rem;}
 
 @media (max-width:640px){
   .masthead{padding:24px 22px 44px;}
   .masthead h1{font-size:1.5rem;}
   .figures .cols{grid-template-columns:1fr 1fr;padding:0 8px;}
   .figures .value{font-size:1.4rem;}
-  .tabs{display:grid;grid-template-columns:1fr 1fr;}
   .panel{padding:18px 16px 20px;}
+  .alert-item{font-size:.8rem;padding:9px 11px;gap:8px;border-radius:14px;}
+  .alert-item .tag{font-size:.66rem;padding:2px 8px;}
+  /* スマホでは切り替えタブを画面の下に固定する */
+  .sheet{padding-bottom:calc(104px + env(safe-area-inset-bottom));}
+  .tabs{
+    position:fixed;z-index:20;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:repeat(4,1fr);border-radius:22px;
+    box-shadow:0 2px 6px rgba(22,50,74,.08),0 14px 34px -10px rgba(22,50,74,.45);
+  }
+  .tabs button{flex-direction:column;gap:3px;padding:8px 2px 7px;font-size:.68rem;border-radius:16px;}
+  .tabs svg{width:21px;height:21px;}
+  .tabs .tl{display:none;} .tabs .ts{display:inline;}
 }
 </style>
 </head>
@@ -277,51 +361,69 @@ button.ghost{
   </header>
 
   <section class="figures">
-    <h2>数字で見る取り込み状況</h2>
+    <h2>いまの状況</h2>
     <div class="cols">
-      <div class="col"><div class="label">取り込んだ広報</div><div class="value" id="figIssues">―<span class="unit">号</span></div></div>
+      <div class="col"><div class="label">要対応</div><div class="value" id="figPending">―<span class="unit">人</span></div></div>
+      <div class="col"><div class="label">最終確認</div><div class="value" id="figLast">―</div></div>
       <div class="col"><div class="label">名簿の登録</div><div class="value" id="figRoster">―<span class="unit">人</span></div></div>
-      <div class="col"><div class="label">照合の記録</div><div class="value" id="figChecks">―<span class="unit">件</span></div></div>
       <div class="col"><div class="label">次のごみ収集</div><div class="value" id="figGomi">―</div></div>
     </div>
   </section>
 
+  <section class="alerts" id="alerts" aria-live="polite" aria-label="お知らせ"></section>
+
   <nav class="tabs" role="tablist" aria-label="画面の切り替え">
-    <button role="tab" id="tab-import" aria-controls="panel-import" aria-selected="true" data-tone="sky">広報の取り込み</button>
-    <button role="tab" id="tab-roster" aria-controls="panel-roster" aria-selected="false" data-tone="leaf">名簿と照合</button>
-    <button role="tab" id="tab-toc" aria-controls="panel-toc" aria-selected="false" data-tone="rose">見出し案内</button>
-    <button role="tab" id="tab-gomi" aria-controls="panel-gomi" aria-selected="false" data-tone="sand">高田8区のごみ</button>
+    <button role="tab" id="tab-import" aria-controls="panel-import" aria-selected="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/></svg>
+      <span class="tl">広報の取り込み</span><span class="ts">取り込み</span></button>
+    <button role="tab" id="tab-roster" aria-controls="panel-roster" aria-selected="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="m15.5 10 2 2 4-4"/></svg>
+      <span class="tl">照合と名簿</span><span class="ts">照合・名簿</span></button>
+    <button role="tab" id="tab-toc" aria-controls="panel-toc" aria-selected="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>
+      <span class="tl">見出し案内</span><span class="ts">見出し</span></button>
+    <button role="tab" id="tab-gomi" aria-controls="panel-gomi" aria-selected="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v5m4-5v5"/></svg>
+      <span class="tl">高田8区のごみ</span><span class="ts">ごみ</span></button>
   </nav>
 
   <div class="grid" id="panel-import" role="tabpanel" aria-labelledby="tab-import">
     <section class="panel wide">
       <div class="band sky">広　報</div>
-      <div class="desc">PDFを選ぶだけで、この端末の中で自動的に名簿と照合します。</div>
-      <form id="pdfForm" style="border-top:none;padding-top:0;">
-        <span class="chip-label sky">PDFから取り込む</span>
-        <div class="fields"><input type="file" id="pdfFile" accept="application/pdf,.pdf"></div>
-        <div class="hint">ファイルを選ぶと自動で読み取りが始まり、名簿(登録済みの氏名)と自動で照合します。読み取るのは端末内だけで、ファイルも中身も外部には送信されません。</div>
-        <button type="submit" class="go">読み取る</button>
-        <div id="pdfMsg"></div>
-      </form>
+      <label class="drop" id="pdfDrop">
+        <input type="file" id="pdfFile" accept="application/pdf,.pdf" class="sr-only">
+        <span class="drop-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg></span>
+        <span class="drop-main">広報のPDFを選ぶ</span>
+        <span class="drop-sub">またはここにドラッグ&amp;ドロップ。選ぶとすぐに読み取り、名簿と照合します。</span>
+      </label>
+      <div class="hint center">読み取りと照合はこの端末の中だけで行います。ファイルも中身も外部には送信されません。</div>
+      <div id="pdfMsg"></div>
       <div id="pdfResult"></div>
+
+      <span class="chip-label sky">取り込んだ号</span>
       <div id="issueList" class="list"></div>
-      <form id="issueForm">
-        <span class="chip-label sky">号を追加</span>
-        <div class="fields">
-          <input type="text" id="issueTitle" placeholder="号・見出し(例:令和8年10月号)" required maxlength="80">
-          <input type="date" id="issueDate" required aria-label="発行日">
-        </div>
-        <textarea id="issueNote" placeholder="メモ(掲載内容・慶弔欄の対象期間など)" maxlength="600"></textarea>
-        <button type="submit" class="go">記録する</button>
-        <div id="issueMsg"></div>
-      </form>
+
+      <details class="manual">
+        <summary>号を手動で追加する</summary>
+        <form id="issueForm">
+          <div class="fields">
+            <input type="text" id="issueTitle" placeholder="号・見出し(例:令和8年10月号)" required maxlength="80">
+            <input type="date" id="issueDate" required aria-label="発行日">
+          </div>
+          <textarea id="issueNote" placeholder="メモ(掲載内容・慶弔欄の対象期間など)" maxlength="600"></textarea>
+          <button type="submit" class="go">記録する</button>
+          <div id="issueMsg"></div>
+        </form>
+      </details>
+
       <form id="backupForm">
-        <span class="chip-label sand">データの保存と復元</span>
-        <div class="hint">名簿と照合記録をJSONファイルに書き出せます。機種変更や別の端末に移すときにお使いください。</div>
+        <span class="chip-label sand">データの控え(書き出し・復元)</span>
+        <div class="hint">名簿と照合記録をファイルに書き出せます。ブラウザのデータが消えたときや、機種変更のときに使います。</div>
         <div class="fields">
-          <button type="button" class="ghost" id="exportBtn">書き出す</button>
-          <input type="file" id="importFile" accept="application/json,.json" aria-label="読み込むファイル">
+          <button type="button" class="file-btn" id="exportBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-4-4 4 4 4-4"/><path d="M5 19h14"/></svg>書き出す</button>
+          <label class="file-btn"><input type="file" id="importFile" accept="application/json,.json" class="sr-only">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m-4 4 4-4 4 4"/><path d="M5 19h14"/></svg>控えから復元する</label>
         </div>
         <div id="backupMsg"></div>
       </form>
@@ -329,6 +431,22 @@ button.ghost{
   </div>
 
   <div class="grid" id="panel-roster" role="tabpanel" aria-labelledby="tab-roster" hidden>
+    <section class="panel">
+      <div class="band rose">照　合</div>
+      <div class="desc">広報のPDFを取り込むと自動で照合されます。該当した方の手続きが済んだらチェックしてください。</div>
+      <div id="checkList" class="list tall"></div>
+      <details class="manual">
+        <summary>慶弔欄の文字を貼り付けて照合する</summary>
+        <form id="matchForm">
+          <input type="text" id="matchIssue" placeholder="号の名前(例:令和8年9月号)" maxlength="80">
+          <textarea id="matchText" placeholder="広報の「お悔やみ」欄の文字を貼り付けてください" rows="4"></textarea>
+          <button type="submit" class="go rose">照合する</button>
+          <div id="matchMsg"></div>
+        </form>
+      </details>
+      <div class="notice">照合はこの端末の中だけで行われ、記録には<strong>該当した氏名のみ</strong>が残ります。広報に載っている他の方の情報は保存しません。<br>判定は、氏名の直後の「(NN歳・字名)」の年齢を、名簿の生年月日から計算した年齢と比べて行います。</div>
+    </section>
+
     <section class="panel">
       <div class="band leaf">名　簿</div>
       <div class="desc">照合に使う氏名と生年月日。この端末の中だけに保存されます。</div>
@@ -344,25 +462,14 @@ button.ghost{
       </form>
       <form id="csvForm">
         <span class="chip-label sand">CSVでまとめて追加</span>
-        <div class="fields"><input type="file" id="csvFile" accept=".csv,text/csv"></div>
-        <div class="hint">「氏名,生年月日」の2列。ヘッダー行は省略できます。生年月日は和暦(H12.3.7・平成12年3月7日)でも西暦(2000/3/7)でも読み取ります。Excelで保存したShift_JISのCSVにも対応しています。</div>
-        <button type="submit" class="go">取り込む</button>
+        <div class="fields">
+          <label class="file-btn"><input type="file" id="csvFile" accept=".csv,text/csv" class="sr-only">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h6"/></svg>CSVファイルを選ぶ</label>
+        </div>
+        <div class="hint">選ぶとすぐに取り込みます。「氏名,生年月日」の2列で、ヘッダー行は省略できます。生年月日は和暦(H12.3.7・平成12年3月7日)でも西暦(2000/3/7)でも読み取ります。Excelで保存したShift_JISのCSVにも対応しています。</div>
         <div id="csvMsg"></div>
       </form>
-    </section>
-
-    <section class="panel">
-      <div class="band rose">照　合</div>
-      <div class="desc">広報の慶弔欄を貼り付けると、名簿と突き合わせます。</div>
-      <form id="matchForm" style="border-top:none;padding-top:0;">
-        <span class="chip-label rose">慶弔欄を貼り付けて照合</span>
-        <input type="text" id="matchIssue" placeholder="号の名前(例:令和8年9月号)" maxlength="80">
-        <textarea id="matchText" placeholder="広報の「おくやみ」欄の文字を貼り付けてください" rows="4"></textarea>
-        <button type="submit" class="go rose">照合する</button>
-        <div id="matchMsg"></div>
-      </form>
-      <div id="checkList" class="list"></div>
-      <div class="notice">照合はこの端末の中だけで行われ、記録には<strong>該当した氏名のみ</strong>が残ります。広報に載っている他の方の情報は保存しません。</div>
+      <div class="notice">名簿に追加した方は、<strong>すでに取り込んだ号とは照合されていません</strong>。必要なときは、その号のPDFをもう一度選ぶと照合記録だけを追加できます。</div>
     </section>
   </div>
 
@@ -391,7 +498,7 @@ button.ghost{
 
   <footer class="colophon">
     <span class="page-no">i</span>
-    <span>名簿・照合記録はこの端末のブラウザ内(localStorage)にのみ保存され、外部には送信されません。ブラウザのデータを消去すると失われるため、「データの保存と復元」で控えを取ってください。ごみ収集日・分別・見出しは広報および市ホームページの記載を書き写したものです。変更されることがあるため、最新の広報もあわせてご確認ください。</span>
+    <span>名簿・照合記録はこの端末のブラウザ内(localStorage)にのみ保存され、外部には送信されません。ブラウザのデータを消去すると失われるため、「データの控え」で書き出しておいてください。ごみ収集日・分別・見出しは広報および市ホームページの記載を書き写したものです。変更されることがあるため、最新の広報もあわせてご確認ください。</span>
   </footer>
 </div>
 
@@ -401,9 +508,10 @@ button.ghost{
   const SEED = JSON.parse(document.getElementById("seedData").textContent);
   const KEY = "koho-app.v1";
   const WD = ["日","月","火","水","木","金","土"];
+  const DAY = 86400000;
 
   /* ---------- 保存 ---------- */
-  const blank = { recipients: [], checks: [], koho: [], headlines: [], hiddenSeedIssues: [] };
+  const blank = { recipients: [], checks: [], koho: [], headlines: [], hiddenSeedIssues: [], lastExportAt: null };
   let store = blank;
   try{
     const raw = localStorage.getItem(KEY);
@@ -425,6 +533,9 @@ button.ghost{
 
   /* ---------- 小道具 ---------- */
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const pad = (n) => String(Number(n)).padStart(2, "0");
+  // 端末の時刻(日本時間)での日付。toISOString() は世界標準時なので深夜0〜9時に前日になってしまう
+  const localISO = (d = new Date()) => d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
   const toDate = (v) => {
     if(!v) return null;
     const d = new Date(String(v).length === 10 ? v + "T00:00:00" : v);
@@ -439,29 +550,44 @@ button.ghost{
     const d = toDate(v);
     return d ? d.toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
   };
-  const ageOf = (birth) => {
+  // ref の日の満年齢(省略時は今日)
+  const ageOf = (birth, ref) => {
     const b = toDate(birth);
     if(!b) return null;
-    const now = new Date();
+    const now = ref || new Date();
     let a = now.getFullYear() - b.getFullYear();
     const m = now.getMonth() - b.getMonth();
     if(m < 0 || (m === 0 && now.getDate() < b.getDate())) a--;
     return a;
   };
   const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const daysAgo = (v) => {
+    const d = toDate(v);
+    return d ? Math.round((midnight(new Date()) - midnight(d)) / DAY) : null;
+  };
   const relative = (d) => {
-    const n = Math.round((midnight(d) - midnight(new Date())) / 86400000);
+    const n = Math.round((midnight(d) - midnight(new Date())) / DAY);
     if(n === 0) return "今日";
     if(n === 1) return "明日";
     if(n === 2) return "あさって";
     return n > 0 ? "あと" + n + "日" : "";
   };
-  // カタカナ→ひらがな、全角→半角、区切り文字の除去でゆるく一致させる
-  const norm = (s) => String(s ?? "")
-    .toLowerCase()
+  const han = (s) => String(s).replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
+
+  // 氏名で使われる旧字体・異体字を、広報でよく使われる字にそろえる
+  const VARIANTS = {
+    "髙":"高","﨑":"崎","嵜":"崎","碕":"崎","齋":"斎","齊":"斎","斉":"斎","澤":"沢","邊":"辺","邉":"辺",
+    "濱":"浜","濵":"浜","櫻":"桜","廣":"広","國":"国","嶋":"島","嶌":"島","冨":"富","德":"徳","惠":"恵",
+    "榮":"栄","實":"実","眞":"真","藏":"蔵","瀨":"瀬","槗":"橋","桒":"桑","龍":"竜","兒":"児","壽":"寿",
+    "彌":"弥","萬":"万","條":"条","圓":"円","淺":"浅","戶":"戸","栁":"柳","莊":"荘","增":"増","傳":"伝",
+    "學":"学","鷗":"鴎","曻":"昇","𠮷":"吉","黑":"黒","晉":"晋","祿":"禄","禮":"礼"
+  };
+  // 照合用に文字をそろえる:互換文字・全角半角(NFKC)、異体字、カタカナ→ひらがな、区切り文字の除去、「々」の展開
+  // (「佐 々 木」のように間に空白が入ることがあるので、「々」は空白を除いてから前の字に置き換える)
+  const norm = (s) => Array.from(String(s ?? "").normalize("NFKC").toLowerCase(), c => VARIANTS[c] || c).join("")
     .replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60))
-    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
-    .replace(/[\s　・、,.\-ー―]/g, "");
+    .replace(/[\s・、,.\-ー―‐]/g, "")
+    .replace(/(.)々/g, "$1$1");
 
   const $ = (id) => document.getElementById(id);
   const stamp = $("stamp");
@@ -478,12 +604,20 @@ button.ghost{
 
   /* ---------- タブ ---------- */
   const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
-  tabs.forEach(t => t.addEventListener("click", () => {
+  function selectTab(id){
     tabs.forEach(x=>{
-      const on = x === t;
+      const on = x.id === id;
       x.setAttribute("aria-selected", on ? "true" : "false");
       $(x.getAttribute("aria-controls")).hidden = !on;
     });
+  }
+  tabs.forEach(t => t.addEventListener("click", () => {
+    selectTab(t.id);
+    // スマホでは下のタブから切り替えるので、切り替え先の先頭まで戻す
+    if(matchMedia("(max-width:640px)").matches){
+      const panelTop = $(t.getAttribute("aria-controls")).getBoundingClientRect().top + scrollY - 12;
+      if(scrollY > panelTop) scrollTo({ top: panelTop, behavior: "smooth" });
+    }
   }));
 
   /* ---------- 広報(号) ---------- */
@@ -498,7 +632,6 @@ button.ghost{
   }
   function renderIssues(){
     const rows = allIssues();
-    setFigure("figIssues", rows.length, "号");
     $("issueList").innerHTML = rows.length ? rows.map(d =>
       '<div class="issue-card"><div class="head"><span class="t">' + esc(d.title) + '</span>'
       + '<button type="button" class="del" data-kind="' + esc(d.kind) + '" data-id="' + esc(d.id) + '">削除</button></div>'
@@ -521,7 +654,7 @@ button.ghost{
     }
     store.headlines = store.headlines.filter(h => !(h.issue === target.title && h.date === target.date));
 
-    save(); renderIssues(); renderToc();
+    save(); renderIssues(); renderToc(); renderAlerts();
   });
   $("issueForm").addEventListener("submit",(e)=>{
     e.preventDefault();
@@ -533,11 +666,33 @@ button.ghost{
       return;
     }
     store.koho.push({ id: uid(), title, date, note: $("issueNote").value.trim() });
-    save(); renderIssues();
+    save(); renderIssues(); renderAlerts();
     $("issueTitle").value = ""; $("issueNote").value = "";
-    $("issueDate").valueAsDate = new Date();
+    $("issueDate").value = localISO();
     say($("issueMsg"), "記録しました");
   });
+
+  // 「令和8年9月号」「令和8年8月おしらせ版」の形の号名から、年・月・種類を読む
+  function issueKey(title){
+    const m = han(String(title).replace(/[\s　]/g, "")).match(/令和(\d{1,2})年(\d{1,2})月(おしらせ版|号)/);
+    return m ? (2018 + Number(m[1])) + "-" + Number(m[2]) + "-" + m[3] : null;
+  }
+  // 広報は月2回(上旬に「号」、中旬に「おしらせ版」)。先月と今月の分で、発行済みのはずなのに取り込んでいない号
+  function missingIssues(){
+    const have = new Set(allIssues().map(d => issueKey(d.title)).filter(Boolean));
+    const today = midnight(new Date());
+    const out = [];
+    for(let back = 1; back >= 0; back--){
+      const first = new Date(today.getFullYear(), today.getMonth() - back, 1);
+      const y = first.getFullYear(), m = first.getMonth() + 1;
+      [["号", 5], ["おしらせ版", 22]].forEach(([kind, day])=>{
+        if(today >= new Date(y, m - 1, day) && !have.has(y + "-" + m + "-" + kind)){
+          out.push("令和" + (y - 2018) + "年" + m + "月" + kind);
+        }
+      });
+    }
+    return out;
+  }
 
   /* ---------- 名簿 ---------- */
   function renderRoster(){
@@ -546,23 +701,27 @@ button.ghost{
     $("rosterList").innerHTML = rows.length ? rows.map(d=>{
       const age = ageOf(d.birthDate);
       const paren = d.birthDate ? "(" + fmtDate(d.birthDate) + (age !== null ? "・" + age + "歳" : "") + ")"
-                  : (d.birthRaw ? "(" + d.birthRaw + ")" : "");
+                  : (d.birthRaw ? "(" + d.birthRaw + ")" : "(生年月日なし)");
       return '<div class="entry"><span class="nm">' + esc(d.name) + '</span>'
-        + (paren ? '<span class="paren">' + esc(paren) + '</span>' : '')
+        + '<span class="paren">' + esc(paren) + '</span>'
         + '<button type="button" data-del="' + esc(d.id) + '">削除</button></div>';
     }).join("") : '<div class="empty">まだ登録がありません。下から追加してください。</div>';
   }
   $("rosterList").addEventListener("click",(e)=>{
     const btn = e.target.closest("button[data-del]");
     if(!btn) return;
-    store.recipients = store.recipients.filter(r => r.id !== btn.dataset.del);
-    save(); renderRoster();
+    const target = store.recipients.find(r => r.id === btn.dataset.del);
+    if(!target) return;
+    if(!confirm("「" + target.name + "」を名簿から削除しますか?これ以降の照合の対象から外れます。")) return;
+    store.recipients = store.recipients.filter(r => r.id !== target.id);
+    save(); renderRoster(); renderAlerts();
   });
   // 同じ氏名(表記ゆれは無視)・同じ生年月日の人がすでに名簿にいるか
   function recipientExists(name, birthDate){
     const key = norm(name);
     return store.recipients.some(r => norm(r.name) === key && (r.birthDate || null) === (birthDate || null));
   }
+  const PAST_NOTE = "すでに取り込んだ号とは照合していません";
   $("rosterForm").addEventListener("submit",(e)=>{
     e.preventDefault();
     const name = $("rosterName").value.trim();
@@ -573,9 +732,9 @@ button.ghost{
       return;
     }
     store.recipients.push({ id: uid(), name, birthDate, addedAt: new Date().toISOString() });
-    save(); renderRoster();
+    save(); renderRoster(); renderAlerts();
     $("rosterName").value = ""; $("rosterBirth").value = "";
-    say($("rosterMsg"), "追加しました");
+    say($("rosterMsg"), "追加しました(" + PAST_NOTE + (birthDate ? "" : "。生年月日がないと年齢での確認ができません") + ")");
   });
 
   function parseCsvLine(line){
@@ -642,8 +801,9 @@ button.ghost{
     }
   }
 
-  $("csvForm").addEventListener("submit", async (e)=>{
-    e.preventDefault();
+  // CSVはファイルを選んだ時点で取り込む
+  $("csvForm").addEventListener("submit", (e)=> e.preventDefault());
+  $("csvFile").addEventListener("change", async ()=>{
     const file = $("csvFile").files[0];
     if(!file) return;
     try{
@@ -661,47 +821,175 @@ button.ghost{
         store.recipients.push(rec);
         added++;
       });
-      save(); renderRoster();
+      save(); renderRoster(); renderAlerts();
       say($("csvMsg"), added + "件を名簿に追加しました"
         + (skipped ? " / " + skipped + "件は氏名が空のため除外" : "")
         + (unread ? " / " + unread + "件は生年月日を読み取れずそのまま保存" : "")
-        + (dup ? " / " + dup + "件はすでに名簿にあるため除外" : ""), dup > 0 && added === 0);
-      $("csvFile").value = "";
+        + (dup ? " / " + dup + "件はすでに名簿にあるため除外" : "")
+        + (added ? "(" + PAST_NOTE + ")" : ""), dup > 0 && added === 0);
     }catch(err){
       say($("csvMsg"), "取り込めませんでした: " + (err.message || err), true);
     }
+    $("csvFile").value = "";
   });
 
   /* ---------- 照合 ---------- */
+  // 慶弔欄の「お悔やみ」は「氏名(NN歳・字名)」の形。氏名のすぐ後の年齢と、名簿の生年月日から出した年齢を比べる
+  const RANK = { mismatch: 0, unknown: 1, match: 2 };
+  const LEVEL = {
+    match:    { label: "年齢一致",     tone: "coral" },
+    unknown:  { label: "要確認",       tone: "sand" },
+    mismatch: { label: "別人の可能性", tone: "gray" }
+  };
+  const personKey = (m) => norm(m.name) + "|" + (m.birthDate || "");
+
+  // pages: [{ no, body, full }](どちらも norm 済みの文字列)。ref は年齢を計算する基準日(広報の発行日)
+  function findMatches(pages, ref){
+    const out = [];
+    store.recipients.forEach(r=>{
+      const needle = norm(r.name);
+      if(needle.length < 2) return;
+      const expected = r.birthDate ? ageOf(r.birthDate, ref) : null;
+      let best = null;
+      pages.forEach(p => [p.body, p.full].forEach(hay=>{
+        for(let at = hay.indexOf(needle); at >= 0; at = hay.indexOf(needle, at + 1)){
+          const end = at + needle.length;
+          // ふりがなが残っている場合に備えて、氏名と「(」の間のひらがなだけは読み飛ばす
+          const am = hay.slice(end, end + 14).match(/^[ぁ-ゖ]{0,6}\((\d{1,3})歳/);
+          const printed = am ? Number(am[1]) : null;
+          let level = "unknown";
+          if(printed !== null && expected !== null) level = Math.abs(printed - expected) <= 1 ? "match" : "mismatch";
+          if(!best || RANK[level] > RANK[best.level]){
+            best = { name: r.name, birthDate: r.birthDate || null, page: p.no, printedAge: printed,
+                     expectedAge: expected, level, snippet: hay.slice(at, end + 14), done: false };
+          }
+        }
+      }));
+      if(best) out.push(best);
+    });
+    // 以前の照合で「手続き済み」にした方は、その状態を引き継ぐ
+    const doneKeys = new Set();
+    store.checks.forEach(c => (c.matches || []).forEach(m => { if(m.done) doneKeys.add(personKey(m)); }));
+    out.forEach(m => { if(doneKeys.has(personKey(m))) m.done = true; });
+    return out;
+  }
+  const levelOf = (m) => m.level || "unknown";
+  const isPending = (m) => levelOf(m) !== "mismatch" && !m.done;
+  const isDoneHit = (m) => levelOf(m) !== "mismatch" && m.done;
+  // 慶弔欄を確認できなかった照合(画像のPDF・欄が見つからない)で、紙面での確認がまだのもの
+  const isUnverified = (c) => (c.coverage === "unreadable" || c.coverage === "notFound") && !c.manualOk;
+
+  function pendingPeople(){
+    const seen = new Map();
+    store.checks.slice().sort((a,b)=> String(b.checkedAt).localeCompare(String(a.checkedAt))).forEach(c=>{
+      (c.matches || []).forEach(m=>{
+        const k = personKey(m);
+        if(isPending(m) && !seen.has(k)) seen.set(k, { m, issue: c.issue });
+      });
+    });
+    return Array.from(seen.values());
+  }
+  function matchDetail(m){
+    const parts = [];
+    if(m.page) parts.push("p." + m.page);
+    if(m.printedAge != null) parts.push("広報 " + m.printedAge + "歳");
+    if(m.expectedAge != null) parts.push("名簿から " + m.expectedAge + "歳");
+    if(levelOf(m) === "unknown"){
+      parts.push(m.printedAge == null ? "氏名の直後に年齢の記載なし(記事中の同名・一部一致の可能性)"
+                                      : "生年月日が未登録のため年齢を比べられません");
+    }
+    if(levelOf(m) === "mismatch") parts.push("年齢が合わないため別人の可能性が高いです");
+    return parts.join(" ・ ");
+  }
+  function matchRow(m, attr){
+    const lv = LEVEL[levelOf(m)];
+    return '<div class="m-row' + (m.done ? " done" : "") + '">'
+      + '<div class="m-top"><span class="m-name">' + esc(m.name) + '</span>'
+      + '<span class="lv ' + lv.tone + '">' + lv.label + '</span></div>'
+      + '<div class="m-sub">' + esc(matchDetail(m)) + '</div>'
+      + (m.snippet ? '<div class="snip">…' + esc(m.snippet) + '…</div>' : '')
+      + (attr ? '<label class="done-check"><input type="checkbox" ' + attr + (m.done ? " checked" : "") + '>'
+        + (levelOf(m) === "mismatch" ? "確認済み" : "手続き済み") + '</label>' : '')
+      + '</div>';
+  }
+  const COVERAGE = {
+    unreadable: "PDFから文字を読み取れなかったため、照合できていません。紙面で慶弔欄を確認してください。",
+    notFound: "慶弔欄(「NN歳・字名」の記載)が見つからなかったため、該当なしとは言い切れません。紙面で確認してください。",
+    noColumn: "おしらせ版のため慶弔欄はありません。"
+  };
+
   function renderChecks(){
     const rows = store.checks.slice().sort((a,b)=> String(b.checkedAt).localeCompare(String(a.checkedAt)));
-    setFigure("figChecks", rows.length, "件");
+    const pending = pendingPeople();
+    setFigure("figPending", pending.length, "人");
+    const last = rows[0];
+    const ago = last ? daysAgo(last.checkedAt) : null;
+    setFigure("figLast", ago === null ? "―" : ago === 0 ? "今日" : ago === 1 ? "昨日" : ago, ago > 1 ? "日前" : "");
+
     if(!rows.length){
-      $("checkList").innerHTML = '<div class="empty">まだ照合の記録がありません。</div>';
+      $("checkList").innerHTML = '<div class="empty">まだ照合の記録がありません。「広報の取り込み」でPDFを選ぶと、自動で照合されます。</div>';
       setStamp(null,"この端末に保存");
       return;
     }
     $("checkList").innerHTML = rows.map(d=>{
       const hits = Array.isArray(d.matches) ? d.matches : [];
-      const hit = hits.length > 0;
-      return '<div class="log' + (hit ? " hit" : "") + '">'
+      const open = hits.filter(isPending).length;
+      const warn = isUnverified(d);
+      const cls = open ? " hit" : warn ? " warn" : (d.coverage === "noColumn" && !hits.length) ? " neutral" : "";
+      const verdict = open ? "要対応 " + open + "人"
+        : hits.length ? "対応済み"
+        : warn ? "確認できず"
+        : d.coverage === "noColumn" ? "慶弔欄なし"
+        : "該当なし";
+      return '<div class="log' + cls + '">'
         + '<div class="head"><span class="issue">' + esc(d.issue || fmtDate(d.date)) + '</span>'
-        + '<span class="verdict">' + (hit ? "該当 " + hits.length + "件" : "該当なし") + '</span></div>'
-        + (hit ? '<div class="hits">' + hits.map(m=>esc(m.name)).join("、") + '</div>' : '')
-        + (hit ? hits.filter(m=>m.snippet).map(m=>'<div class="snip">…' + esc(m.snippet) + '…</div>').join("") : '')
+        + '<span class="verdict">' + verdict + '</span></div>'
+        + (COVERAGE[d.coverage] && !(d.coverage === "noColumn" && hits.length)
+            ? '<div class="cov">' + esc(d.manualOk ? "紙面で確認済み" : COVERAGE[d.coverage]) + '</div>' : '')
+        + hits.map((m,i) => matchRow(m, 'data-done="' + esc(d.id) + ':' + i + '"')).join("")
         + '<div class="sub">' + esc(fmtStamp(d.checkedAt)) + ' 照合 ・ 名簿' + esc(d.rosterSize) + '人'
+        + (warn ? ' <button type="button" class="del ok" data-ok="' + esc(d.id) + '">紙面で確認した</button>' : '')
         + ' <button type="button" class="del" data-del="' + esc(d.id) + '">削除</button></div>'
         + '</div>';
     }).join("");
-    const latest = rows[0];
-    const hit = Array.isArray(latest.matches) && latest.matches.length > 0;
-    setStamp(hit ? "alert" : "calm", (hit ? "直近の照合で該当あり" : "直近の照合では該当なし") + " ・ " + fmtStamp(latest.checkedAt));
+
+    if(pending.length){
+      setStamp("alert", "要対応 " + pending.length + "人");
+    }else{
+      setStamp(isUnverified(last) ? "alert" : "calm",
+        (isUnverified(last) ? "直近の号は慶弔欄を確認できず" : "直近の照合では要対応なし") + " ・ " + fmtStamp(last.checkedAt));
+    }
   }
+  $("checkList").addEventListener("change",(e)=>{
+    const cb = e.target.closest("input[data-done]");
+    if(!cb) return;
+    const [id, idx] = cb.dataset.done.split(":");
+    const c = store.checks.find(x => x.id === id);
+    const m = c && c.matches[Number(idx)];
+    if(!m) return;
+    // 同じ方が複数の照合記録に出ていれば、まとめて同じ状態にする
+    const key = personKey(m);
+    store.checks.forEach(x => (x.matches || []).forEach(y=>{
+      if(personKey(y) === key){ y.done = cb.checked; y.doneAt = cb.checked ? new Date().toISOString() : null; }
+    }));
+    save(); renderChecks(); renderAlerts();
+  });
   $("checkList").addEventListener("click",(e)=>{
+    const ok = e.target.closest("button[data-ok]");
+    if(ok){
+      const c = store.checks.find(x => x.id === ok.dataset.ok);
+      if(c && confirm("「" + c.issue + "」の慶弔欄を紙面で確認し、名簿の方が載っていないことを確かめましたか?")){
+        c.manualOk = true;
+        save(); renderChecks(); renderAlerts();
+      }
+      return;
+    }
     const btn = e.target.closest("button[data-del]");
     if(!btn) return;
-    store.checks = store.checks.filter(c => c.id !== btn.dataset.del);
-    save(); renderChecks();
+    const c = store.checks.find(x => x.id === btn.dataset.del);
+    if(!c || !confirm("「" + c.issue + "」の照合記録を削除しますか?")) return;
+    store.checks = store.checks.filter(x => x.id !== c.id);
+    save(); renderChecks(); renderAlerts();
   });
   $("matchForm").addEventListener("submit",(e)=>{
     e.preventDefault();
@@ -709,32 +997,27 @@ button.ghost{
     if(!text.trim()){ say($("matchMsg"),"照合するテキストを貼り付けてください", true); return; }
     if(!store.recipients.length){ say($("matchMsg"),"先に名簿を登録してください", true); return; }
     const hay = norm(text);
-    const matches = [];
-    store.recipients.forEach(r=>{
-      const needle = norm(r.name);
-      if(!needle) return;
-      const at = hay.indexOf(needle);
-      if(at >= 0){
-        matches.push({
-          name: r.name,
-          birthDate: r.birthDate || null,
-          snippet: hay.slice(Math.max(0, at - 12), at + needle.length + 24)
-        });
-      }
-    });
-    const rec = {
+    const matches = findMatches([{ no: null, body: hay, full: hay }], new Date());
+    const coverage = AGE_RE.test(text) ? "ok" : "notFound";
+    AGE_RE.lastIndex = 0;
+    store.checks.push({
       id: uid(),
       issue: $("matchIssue").value.trim() || "貼り付けたテキスト",
-      date: new Date().toISOString().slice(0,10),
+      date: localISO(),
       checkedAt: new Date().toISOString(),
       rosterSize: store.recipients.length,
+      coverage,
       matches
-    };
-    store.checks.push(rec);
-    save(); renderChecks();
-    say($("matchMsg"), matches.length
-      ? "該当 " + matches.length + "件:" + matches.map(m=>m.name).join("、")
-      : "名簿の中に該当はありませんでした", matches.length > 0);
+    });
+    save(); renderChecks(); renderAlerts();
+    const open = matches.filter(isPending);
+    const done = matches.filter(isDoneHit);
+    say($("matchMsg"), open.length
+      ? "要対応 " + open.length + "人:" + open.map(m=>m.name).join("、")
+      : done.length ? "該当した方(" + done.map(m=>m.name).join("、") + ")は手続き済みです"
+      : matches.length ? "名前が一致した方はいますが、年齢が合わないため別人の可能性が高いです"
+      : coverage === "notFound" ? "「(NN歳・字名)」の記載が見つかりません。お悔やみ欄の部分を貼り付けたか確認してください"
+      : "名簿の中に該当はありませんでした", open.length > 0 || coverage === "notFound");
     $("matchText").value = "";
   });
 
@@ -832,9 +1115,6 @@ button.ghost{
 
   const AGE_RE = /[（(]\s*\d{1,3}\s*歳[・･][^）)]{1,12}[）)]/g;
 
-  const han = (s) => String(s).replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
-  const pad = (n) => String(Number(n)).padStart(2, "0");
-
   // 奥付(最終ページ)の「No.1218 令和８年９月号（令和８年９月２日発行）」から号と発行日を読む
   function guessIssue(fileName, pages){
     const order = [];
@@ -854,7 +1134,7 @@ button.ghost{
       let date = "";
       if(pub) date = (2018 + Number(pub[1])) + "-" + pad(pub[2]) + "-" + pad(pub[3]);
       else if(kind) date = (2018 + Number(kind[1])) + "-" + pad(kind[2]) + "-01";
-      if(date) return { title, date, from: "奥付(" + p.no + "ページ)から取得" };
+      if(date) return { title, date, kind: kind ? kind[3] : null, from: "奥付(" + p.no + "ページ)から取得" };
     }
 
     const fm = fileName.match(/(20\d{2})[-_.]?(\d{2})[-_.]?(\d{2})?/);
@@ -862,24 +1142,33 @@ button.ghost{
       return {
         title: "広報りくぜんたかた 令和" + (Number(fm[1]) - 2018) + "年" + Number(fm[2]) + "月号",
         date: fm[1] + "-" + fm[2] + "-" + (fm[3] || "01"),
+        kind: null,
         from: "ファイル名からの推測"
       };
     }
-    return { title: "広報りくぜんたかた", date: "", from: "自動では判別できませんでした" };
+    return { title: "広報りくぜんたかた", date: "", kind: null, from: "自動では判別できませんでした" };
   }
 
-  // ファイルを選んだ時点で自動的に読み取りを始める(ボタンは手動の読み取り直し用に残す)
-  $("pdfFile").addEventListener("change", ()=>{
-    if($("pdfFile").files[0]) $("pdfForm").requestSubmit();
-  });
+  // 照合できたと言えるか:文字が読めたか、慶弔欄(「NN歳・字名」)があったか
+  function coverageOf(pages, fullText, obits, guess){
+    const chars = fullText.replace(/\s/g, "").length;
+    if(chars < pages.length * 80) return "unreadable";
+    if(obits > 0) return "ok";
+    if(guess.kind === "おしらせ版") return "noColumn";
+    return "notFound";
+  }
 
   let readResult = null;
-  $("pdfForm").addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const file = $("pdfFile").files[0];
-    if(!file) return;
-    const btn = e.target.querySelector("button");
-    btn.disabled = true;
+  let reading = false;
+  async function handlePdf(file){
+    if(!file || reading) return;
+    if(!(file.type === "application/pdf" || /\.pdf$/i.test(file.name))){
+      say($("pdfMsg"), "PDFファイルを選んでください(" + file.name + ")", true);
+      return;
+    }
+    reading = true;
+    const drop = $("pdfDrop");
+    drop.classList.add("busy");
     $("pdfResult").innerHTML = "";
     try{
       $("pdfMsg").innerHTML = '<div class="toast busy">読み取りを始めます…</div>';
@@ -888,54 +1177,74 @@ button.ghost{
       });
       const fullText = pages.map(p=>p.text).join("\n");
       const guess = guessIssue(file.name, pages);
-      const obits = fullText.match(AGE_RE) || [];
+      const obits = (fullText.match(AGE_RE) || []).length;
+      const coverage = coverageOf(pages, fullText, obits, guess);
 
       // ふりがなを除いた本文と、全文の両方を照合対象にする
-      const hays = [norm(pages.map(bodyText).join("\n")), norm(fullText)];
-      const matches = [];
-      store.recipients.forEach(r=>{
-        const needle = norm(r.name);
-        if(!needle) return;
-        for(const hay of hays){
-          const at = hay.indexOf(needle);
-          if(at >= 0){
-            matches.push({ name: r.name, snippet: hay.slice(at, at + needle.length + 14) });
-            break;
-          }
-        }
-      });
+      const normPages = pages.map(p => ({ no: p.no, body: norm(bodyText(p)), full: norm(p.text) }));
+      const matches = findMatches(normPages, toDate(guess.date) || new Date());
 
       const heads = [];
       pages.forEach(p => headlineCandidates(p).forEach(s => heads.push({ page: String(p.no), title: s })));
 
-      readResult = { file: file.name, pages: pages.length, guess, obits: obits.length, matches, heads };
+      readResult = { file: file.name, pages: pages.length, guess, obits, coverage, matches, heads };
       renderReadout();
       say($("pdfMsg"), pages.length + "ページを読み取りました");
     }catch(err){
       say($("pdfMsg"), "読み取れませんでした: " + (err.message || err), true);
-    }finally{ btn.disabled = false; }
+    }finally{
+      reading = false;
+      drop.classList.remove("busy");
+      $("pdfFile").value = "";
+    }
+  }
+  $("pdfFile").addEventListener("change", ()=> handlePdf($("pdfFile").files[0]));
+
+  // 画面のどこにPDFを落としても取り込めるようにする
+  const hasFiles = (e) => e.dataTransfer && Array.from(e.dataTransfer.types || []).includes("Files");
+  let dragDepth = 0;
+  document.addEventListener("dragenter", (e)=>{ if(hasFiles(e)){ dragDepth++; $("pdfDrop").classList.add("drag"); } });
+  document.addEventListener("dragleave", (e)=>{ if(hasFiles(e) && --dragDepth <= 0){ dragDepth = 0; $("pdfDrop").classList.remove("drag"); } });
+  document.addEventListener("dragover", (e)=>{ if(hasFiles(e)) e.preventDefault(); });
+  document.addEventListener("drop", (e)=>{
+    if(!hasFiles(e)) return;
+    e.preventDefault();
+    dragDepth = 0;
+    $("pdfDrop").classList.remove("drag");
+    const file = e.dataTransfer.files[0];
+    selectTab("tab-import");
+    handlePdf(file);
   });
 
   function renderReadout(){
     const r = readResult;
     if(!r){ $("pdfResult").innerHTML = ""; return; }
-    const hit = r.matches.length > 0;
+    const open = r.matches.filter(isPending);
     const dupNow = issueExists(r.guess.title, r.guess.date);
+
+    let found;
+    if(!store.recipients.length) found = '<div class="found">名簿が空のため照合していません</div>';
+    else if(r.coverage === "unreadable" || r.coverage === "notFound")
+      found = '<div class="found warn"><strong>' + (r.coverage === "unreadable" ? "照合できていません" : "慶弔欄を確認できません")
+        + '</strong>' + esc(COVERAGE[r.coverage]) + (r.coverage === "unreadable" ? "(画像だけのPDFの可能性があります)" : "") + '</div>';
+    else if(open.length) found = '<div class="found hit"><strong>要対応 ' + open.length + '人</strong>名簿' + store.recipients.length + '人と照合しました</div>';
+    else if(r.matches.some(isDoneHit)) found = '<div class="found"><strong>新たな該当なし</strong>名前が一致した方('
+      + esc(r.matches.filter(isDoneHit).map(m=>m.name).join("、")) + ')は手続き済みです</div>';
+    else if(r.coverage === "noColumn") found = '<div class="found neutral">' + esc(COVERAGE.noColumn) + '照合の対象はありません</div>';
+    else found = '<div class="found"><strong>該当なし</strong>名簿' + store.recipients.length + '人と照合しました(慶弔欄の記載 ' + r.obits + '件)</div>';
+
     $("pdfResult").innerHTML =
       '<div class="readout"><h3>読み取り結果</h3>'
       + '<div class="sub">' + esc(r.file) + ' ・ 全' + r.pages + 'ページ'
         + (r.obits ? ' ・ 「(NN歳・字名)」形式の記載 ' + r.obits + '件' : '') + '</div>'
+      + found
+      + (r.matches.length ? '<div class="mlist">' + r.matches.map(m => matchRow(m, "")).join("") + '</div>' : '')
       + '<div class="fields">'
         + '<input type="text" id="roTitle" value="' + esc(r.guess.title) + '" maxlength="80" aria-label="号の名前">'
         + '<input type="date" id="roDate" value="' + esc(r.guess.date) + '" aria-label="発行日">'
       + '</div>'
-      + '<div class="hint">' + esc(r.guess.from || "自動判別") + '。必要に応じて直してください。</div>'
-      + '<div id="roDupWarn"' + (dupNow ? '' : ' hidden') + '><div class="toast bad">この号はすでに登録されています。号の名前か発行日を確認してください。</div></div>'
-      + '<div class="found' + (hit ? " hit" : "") + '">'
-        + (!store.recipients.length ? "名簿が空のため照合していません"
-           : hit ? "名簿と照合 → 該当 " + r.matches.length + "件:" + r.matches.map(m=>m.name).join("、")
-                 : "名簿" + store.recipients.length + "人と照合 → 該当はありませんでした")
-      + '</div>'
+      + '<div class="hint">号の名前と発行日は' + esc(r.guess.from || "自動判別") + '。必要に応じて直してください。</div>'
+      + '<div id="roDupWarn"' + (dupNow ? '' : ' hidden') + '><div class="toast bad">この号はすでに登録されています。保存すると号・見出しは追加せず、照合記録だけを追加します。</div></div>'
       + (r.heads.length
           ? '<div><div class="sub" style="margin-bottom:5px;">見出しの候補(保存するものにチェック)</div>'
             + '<div class="head-pick">' + r.heads.map((h,i)=>
@@ -954,36 +1263,40 @@ button.ghost{
     roDate.addEventListener("input", refreshDupWarn);
 
     $("roSave").addEventListener("click", ()=>{
-      const title = $("roTitle").value.trim();
-      const date = $("roDate").value;
+      const title = roTitle.value.trim();
+      const date = roDate.value;
       if(!title || !date){ say($("roMsg"), "号の名前と発行日を入れてください", true); return; }
-      if(issueExists(title, date)){
+      const dup = issueExists(title, date);
+      // おしらせ版で慶弔欄がなく、名前の一致もなければ、照合記録は残さない(「最終確認」を進めないため)
+      const keepCheck = store.recipients.length && !(r.coverage === "noColumn" && !r.matches.length);
+      if(dup && !keepCheck){
         say($("roMsg"), "同じ号(" + title + " ・ " + fmtDate(date) + ")がすでに登録されています", true);
         return;
       }
 
-      const picked = Array.from(document.querySelectorAll("[data-head]"))
-        .filter(cb => cb.checked)
-        .map(cb => r.heads[Number(cb.dataset.head)]);
-
-      store.koho.push({ id: uid(), title, date,
-        note: "PDFから取り込み(全" + r.pages + "ページ)" + (r.obits ? " / 慶弔欄らしき記載 " + r.obits + "件" : "") });
-
-      if(picked.length){
-        store.headlines = store.headlines.filter(h => !(h.issue === title && h.date === date));
-        store.headlines.push({ id: uid(), issue: title, date, items: picked });
+      let picked = [];
+      if(!dup){
+        picked = Array.from(document.querySelectorAll("[data-head]"))
+          .filter(cb => cb.checked)
+          .map(cb => r.heads[Number(cb.dataset.head)]);
+        store.koho.push({ id: uid(), title, date,
+          note: "PDFから取り込み(全" + r.pages + "ページ)" + (r.obits ? " / 慶弔欄の記載 " + r.obits + "件" : "") });
+        if(picked.length){
+          store.headlines = store.headlines.filter(h => !(h.issue === title && h.date === date));
+          store.headlines.push({ id: uid(), issue: title, date, items: picked });
+        }
       }
-      if(store.recipients.length){
-        store.checks.push({ id: uid(), issue: title, date,
-          checkedAt: new Date().toISOString(), rosterSize: store.recipients.length, matches: r.matches });
+      if(keepCheck){
+        store.checks.push({ id: uid(), issue: title, date, checkedAt: new Date().toISOString(),
+          rosterSize: store.recipients.length, coverage: r.coverage, matches: r.matches });
       }
       save();
-      renderIssues(); renderToc(); renderChecks();
+      renderIssues(); renderToc(); renderChecks(); renderAlerts();
       readResult = null;
       $("pdfResult").innerHTML = "";
-      $("pdfFile").value = "";
-      say($("pdfMsg"), "保存しました(見出し" + picked.length + "件"
-        + (store.recipients.length ? " / 照合記録も追加" : "") + ")");
+      say($("pdfMsg"), dup
+        ? "同じ号(" + title + " ・ " + fmtDate(date) + ")はすでに登録されているため、号は追加せず照合記録だけ保存しました"
+        : "保存しました(見出し" + picked.length + "件" + (keepCheck ? " / 照合記録も追加" : "") + ")");
     });
   }
 
@@ -1012,9 +1325,13 @@ button.ghost{
     }
     return null;
   }
+  const latestGomi = () => SEED.gomi.slice().sort((a,b)=> String(b.month).localeCompare(String(a.month)))[0];
+  const thisMonth = () => localISO().slice(0, 7);
+  const monthLabel = (ym) => Number(ym.slice(5, 7)) + "月";
   function renderGomi(){
-    const d = SEED.gomi.slice().sort((a,b)=> String(b.month).localeCompare(String(a.month)))[0];
+    const d = latestGomi();
     if(!d){ $("gomiBody").innerHTML = '<div class="empty">ごみ収集日の登録がありません。</div>'; return; }
+    const stale = d.month < thisMonth();
     const today = midnight(new Date());
     const upcoming = [];
     const weekly = nextWeekly(d.burnable && d.burnable.weekdays);
@@ -1036,7 +1353,10 @@ button.ghost{
     });
 
     $("gomiBody").innerHTML =
-      (next ? '<div class="next-pickup"><span class="kicker">高田町8区・次の収集</span>'
+      (stale ? '<div class="toast bad">' + esc(monthLabel(thisMonth())) + '分の収集日が未登録です。下は'
+        + esc(monthLabel(d.month)) + '分の表です(燃えるごみの曜日は通常どおり)。' + esc(monthLabel(thisMonth()))
+        + '号の「ごみ収集日」で燃えないごみ・資源の日を確認してください。</div>' : '')
+      + (next ? '<div class="next-pickup"><span class="kicker">高田町8区・次の収集</span>'
         + '<span class="what">' + esc(next.kind) + '</span>'
         + '<span class="when">' + esc(fmtMD(next.date) + " " + relative(next.date)) + '</span></div>' : '')
       + '<div class="gomi-rows">' + rows.map(r =>
@@ -1050,6 +1370,50 @@ button.ghost{
         + (d.contact ? '問い合わせ先:' + esc(d.contact) + '<br>' : '')
         + (d.source ? '出典:' + esc(d.source) : '') + '</div>';
   }
+
+  /* ---------- お知らせ ---------- */
+  // 「広報りくぜんたかた 令和8年9月号(No.1218)」→「令和8年9月号」(お知らせ欄を短くするため)
+  const shortIssue = (t) => String(t || "").replace(/^広報\S*\s*(Takata\s*)?/, "").replace(/[((]No\.\d+[))]/, "").trim() || String(t || "");
+  function renderAlerts(){
+    const items = [];
+    const pending = pendingPeople();
+    pending.slice(0, 5).forEach(({ m, issue })=>{
+      items.push({ tone: "coral", tag: "要対応", goto: "tab-roster",
+        text: m.name + " さん(" + shortIssue(issue) + (m.page ? " p." + m.page : "") + " ・ " + LEVEL[levelOf(m)].label + ")" });
+    });
+    if(pending.length > 5) items.push({ tone: "coral", tag: "要対応", goto: "tab-roster", text: "ほか " + (pending.length - 5) + "人" });
+    store.checks.filter(isUnverified).forEach(c=>{
+      items.push({ tone: "coral", tag: "未確認", goto: "tab-roster",
+        text: "「" + shortIssue(c.issue) + "」は慶弔欄を確認できていません。紙面で確認してください" });
+    });
+    const missing = missingIssues();
+    if(missing.length) items.push({ tone: "sand", tag: "取り込み漏れ", goto: "tab-import",
+      text: missing.join("・") + " がまだ取り込まれていません" });
+    const g = latestGomi();
+    if(g && g.month < thisMonth()) items.push({ tone: "sand", tag: "ごみ", goto: "tab-gomi",
+      text: monthLabel(thisMonth()) + "分のごみ収集日が未登録です" });
+    if(store.recipients.length){
+      const ago = daysAgo(store.lastExportAt);
+      if(ago === null) items.push({ tone: "sky", tag: "控え", goto: "tab-import", focus: "backupForm",
+        text: "名簿の控えをまだ書き出していません" });
+      else if(ago >= 30) items.push({ tone: "sky", tag: "控え", goto: "tab-import", focus: "backupForm",
+        text: "名簿の控えを最後に書き出してから " + ago + "日たっています" });
+    }
+
+    $("alerts").innerHTML = items.length
+      ? items.map(a => '<button type="button" class="alert-item ' + a.tone + '" data-goto="' + a.goto + '"'
+          + (a.focus ? ' data-focus="' + a.focus + '"' : '') + '>'
+          + '<span class="tag">' + esc(a.tag) + '</span><span class="txt">' + esc(a.text) + '</span>'
+          + '<span class="go-arrow" aria-hidden="true">›</span></button>').join("")
+      : '<div class="alert-item calm"><span class="tag">OK</span><span class="txt">確認が必要なことはありません</span></div>';
+  }
+  $("alerts").addEventListener("click", (e)=>{
+    const a = e.target.closest("[data-goto]");
+    if(!a) return;
+    selectTab(a.dataset.goto);
+    const target = a.dataset.focus ? $(a.dataset.focus) : $($(a.dataset.goto).getAttribute("aria-controls"));
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 
   /* ---------- 分別早見表 ---------- */
   const toneByCat = {};
@@ -1082,15 +1446,19 @@ button.ghost{
   $("bunbetsuQ").addEventListener("input", renderSearch);
 
   /* ---------- 保存と復元 ---------- */
+  $("backupForm").addEventListener("submit", (e)=> e.preventDefault());
   $("exportBtn").addEventListener("click",()=>{
-    const body = JSON.stringify({ app:"koho-app", version:1, exportedAt:new Date().toISOString(), data:store }, null, 1);
+    store.lastExportAt = new Date().toISOString();
+    save();
+    const body = JSON.stringify({ app:"koho-app", version:1, exportedAt:store.lastExportAt, data:store }, null, 1);
     const url = URL.createObjectURL(new Blob([body], {type:"application/json"}));
     const a = document.createElement("a");
     a.href = url;
-    a.download = "koho-app-backup-" + new Date().toISOString().slice(0,10) + ".json";
+    a.download = "koho-app-backup-" + localISO() + ".json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
-    say($("backupMsg"), "書き出しました");
+    say($("backupMsg"), "書き出しました(名簿" + store.recipients.length + "人・照合" + store.checks.length + "件)");
+    renderAlerts();
   });
   $("importFile").addEventListener("change", async (e)=>{
     const file = e.target.files[0];
@@ -1099,10 +1467,14 @@ button.ghost{
       const parsed = JSON.parse(await file.text());
       const data = parsed && parsed.data ? parsed.data : parsed;
       if(!data || !Array.isArray(data.recipients)) throw new Error("形式が違います");
-      store = Object.assign({}, blank, data);
-      save();
-      renderRoster(); renderChecks(); renderIssues(); renderToc();
-      say($("backupMsg"), "読み込みました(名簿" + store.recipients.length + "人・照合" + store.checks.length + "件)");
+      const msg = "いまの名簿" + store.recipients.length + "人・照合" + store.checks.length + "件を、控えの内容(名簿"
+        + data.recipients.length + "人・照合" + (Array.isArray(data.checks) ? data.checks.length : 0) + "件)で置き換えます。よろしいですか?";
+      if(confirm(msg)){
+        store = Object.assign({}, blank, data);
+        save();
+        renderRoster(); renderChecks(); renderIssues(); renderToc(); renderAlerts();
+        say($("backupMsg"), "復元しました(名簿" + store.recipients.length + "人・照合" + store.checks.length + "件)");
+      }
     }catch(err){
       say($("backupMsg"), "読み込めませんでした: " + (err.message || err), true);
     }
@@ -1110,8 +1482,8 @@ button.ghost{
   });
 
   /* ---------- 初期表示 ---------- */
-  $("issueDate").valueAsDate = new Date();
-  renderIssues(); renderRoster(); renderChecks(); renderToc(); renderGomi(); renderCats();
+  $("issueDate").value = localISO();
+  renderIssues(); renderRoster(); renderChecks(); renderToc(); renderGomi(); renderCats(); renderAlerts();
 })();
 </script>
 </body>
