@@ -7,7 +7,7 @@
 ## 構成
 
 ```
-webapp/
+(リポジトリ直下)
   src/template.html      アプリ本体のテンプレート(プレースホルダー入り)
   seed/                  アプリに埋め込む初期データ
     bunbetsu/*.json       ごみの分別区分(10区分)
@@ -25,7 +25,6 @@ webapp/
 ## ビルド方法
 
 ```
-cd webapp
 python3 build.py
 ```
 

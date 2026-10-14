@@ -4,9 +4,9 @@
 使い方:
     python3 build.py
 
-webapp/src/template.html に、webapp/seed/ 以下のデータと
-webapp/vendor/pdfjs/ の pdf.js 一式、webapp/vendor/fonts/ の見出し用フォントを埋め込み、
-webapp/koho-app.html を生成する。
+src/template.html に、seed/ 以下のデータと
+vendor/pdfjs/ の pdf.js 一式、vendor/fonts/ の見出し用フォントを埋め込み、
+koho-app.html を生成する。
 外部ネットワークへのアクセスは不要(すべてこのリポジトリ内のファイルで完結する)。
 """
 import base64
