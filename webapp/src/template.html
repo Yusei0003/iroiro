@@ -218,6 +218,18 @@ h1,h2,h3{font-family:"Koho Rounded","Noto Sans JP",sans-serif;margin:0;text-wrap
 .gomi-row .kind{flex:none;min-width:6.5em;font-weight:500;font-size:.88rem;display:flex;align-items:center;gap:7px;}
 .gomi-row .kind::before{content:"◆";font-size:.64rem;color:var(--sand);}
 .gomi-row .when{flex:1;font-size:.88rem;}
+.gomi-row .when small{display:block;font-size:.7rem;color:var(--muted);line-height:1.45;}
+.gomi-row.past{opacity:.55;}
+.gomi-month{font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-size:.86rem;font-weight:700;color:var(--sand);margin-top:4px;}
+.mv{font-size:.72rem;color:var(--coral);font-weight:500;}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);}
+.gomi-table{border-collapse:collapse;width:100%;font-size:.8rem;}
+.gomi-table th,.gomi-table td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;vertical-align:top;}
+.gomi-table thead th{font-family:"Koho Rounded","Noto Sans JP",sans-serif;font-weight:700;color:var(--ink-soft);background:var(--surface-2);}
+.gomi-table tbody th{color:var(--muted);font-weight:500;}
+.gomi-table tr:last-child th,.gomi-table tr:last-child td{border-bottom:none;}
+.gomi-table td.moved{background:var(--coral-soft);}
+.gomi-table .mv{display:block;font-size:.66rem;}
 .gomi-row .soon{flex:none;font-size:.71rem;padding:2px 10px;border-radius:999px;background:var(--sand-soft);color:var(--sand);font-weight:500;}
 .notice{font-size:.79rem;color:var(--ink-soft);background:var(--surface-2);border:1px dashed var(--line-strong);border-radius:12px;padding:10px 13px;}
 .notice strong{color:var(--coral);font-weight:700;}
@@ -484,8 +496,19 @@ button.ghost{
   <div class="grid" id="panel-gomi" role="tabpanel" aria-labelledby="tab-gomi" hidden>
     <section class="panel wide">
       <div class="band sand">高田町8区のごみ</div>
-      <div class="desc">広報の「ごみ収集日」から、高田町8区の分を抜き出しています。</div>
+      <div class="desc">市の「収集日程表」(年度ごと)から、高田町8区の収集日をその月に合わせて表示します。</div>
       <div id="gomiBody"></div>
+      <details class="manual" id="gomiImport">
+        <summary>年度の収集日程表を取り込む</summary>
+        <form id="gomiForm">
+          <div class="hint">年度初めに配られる「燃えるごみ収集日程表」「燃えないごみ・資源の収集日程表」のPDFを選ぶと、高田町8区の1年分(4月〜3月)の収集日を読み取ります。保存しておけば、月が変わるたびに自動でその月の収集日を表示します。読み取りはこの端末の中だけで行います。</div>
+          <label class="file-btn"><input type="file" id="gomiFile" accept="application/pdf,.pdf" class="sr-only">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/></svg>収集日程表のPDFを選ぶ</label>
+          <div id="gomiMsg"></div>
+          <div id="gomiResult"></div>
+          <div id="gomiYears"></div>
+        </form>
+      </details>
     </section>
     <section class="panel wide">
       <div class="band leaf">分別早見表</div>
@@ -511,7 +534,7 @@ button.ghost{
   const DAY = 86400000;
 
   /* ---------- 保存 ---------- */
-  const blank = { recipients: [], checks: [], koho: [], headlines: [], hiddenSeedIssues: [], lastExportAt: null };
+  const blank = { recipients: [], checks: [], koho: [], headlines: [], hiddenSeedIssues: [], lastExportAt: null, gomiYears: [] };
   let store = blank;
   try{
     const raw = localStorage.getItem(KEY);
@@ -1315,61 +1338,349 @@ button.ghost{
     ).join("") : '<div class="empty">見出しの登録がありません。</div>';
   }
 
-  /* ---------- ごみ ---------- */
-  function nextWeekly(weekdays){
-    if(!Array.isArray(weekdays) || !weekdays.length) return null;
-    const today = midnight(new Date());
-    for(let i=0;i<8;i++){
-      const d = new Date(today.getFullYear(), today.getMonth(), today.getDate()+i);
-      if(weekdays.includes(d.getDay())) return d;
+  /* ---------- 祝日(ごみの収集がない日の判定に使う) ---------- */
+  const holidayCache = {};
+  // 国民の祝日(春分・秋分は計算式。1980〜2099年に有効)、国民の休日、振替休日
+  function holidaysOf(year){
+    if(holidayCache[year]) return holidayCache[year];
+    const nthMonday = (m, n) => 1 + (8 - new Date(year, m - 1, 1).getDay()) % 7 + (n - 1) * 7;
+    const off = Math.floor((year - 1980) / 4);
+    const spring = Math.floor(20.8431 + 0.242194 * (year - 1980) - off);
+    const autumn = Math.floor(23.2488 + 0.242194 * (year - 1980) - off);
+    const base = new Set([[1,1],[1,nthMonday(1,2)],[2,11],[2,23],[3,spring],[4,29],[5,3],[5,4],[5,5],
+      [7,nthMonday(7,3)],[8,11],[9,nthMonday(9,3)],[9,autumn],[10,nthMonday(10,2)],[11,3],[11,23]]
+      .map(([m,d]) => localISO(new Date(year, m - 1, d))));
+    const set = new Set(base);
+    const shift = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+    for(let d = new Date(year, 0, 2); d.getFullYear() === year; d = shift(d, 1)){
+      if(d.getDay() !== 0 && !base.has(localISO(d)) && base.has(localISO(shift(d, -1))) && base.has(localISO(shift(d, 1)))){
+        set.add(localISO(d));
+      }
     }
-    return null;
+    base.forEach(k=>{
+      const d = toDate(k);
+      if(d.getDay() !== 0) return;
+      let s = shift(d, 1);
+      while(set.has(localISO(s))) s = shift(s, 1);
+      set.add(localISO(s));
+    });
+    return holidayCache[year] = set;
   }
+  const isHoliday = (d) => holidaysOf(d.getFullYear()).has(localISO(d));
+  // 収集・清掃センターが休みの日:祝日と年末年始(12/31〜1/3)
+  const noCollection = (d) => isHoliday(d) || (d.getMonth() === 11 && d.getDate() === 31) || (d.getMonth() === 0 && d.getDate() <= 3);
+  // その月の第n◯曜日
+  const nthWeekday = (y, m0, n, dow) => new Date(y, m0, 1 + (dow - new Date(y, m0, 1).getDay() + 7) % 7 + (n - 1) * 7);
+
+  /* ---------- 年度の収集日程表(PDF)の読み取り ---------- */
+  const GOMI_AREA = { town: "高田町", ward: 8, label: "高田町8区" };
+  const WD_INDEX = { 日:0, 月:1, 火:2, 水:3, 木:4, 金:5, 土:6 };
+  const nk = (s) => String(s ?? "").normalize("NFKC");
+  const fiscalYearOf = (d) => d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+  const reiwa = (fy) => "令和" + (fy - 2018) + "年度";
+
+  // 文字を y 座標で行にまとめる(上の行から順に、行の中は左から順に)
+  function toRows(items){
+    const rows = [];
+    items.slice().sort((a,b)=> b.y - a.y || a.x - b.x).forEach(it=>{
+      const row = rows.find(r => Math.abs(r.y - it.y) <= 3);
+      if(row) row.items.push(it); else rows.push({ y: it.y, items: [it] });
+    });
+    rows.forEach(r => r.items.sort((a,b)=> a.x - b.x));
+    return rows;
+  }
+  // 表の左端の「町名」「曜日」は、受け持つ何行かの真ん中に1回だけ書かれている。
+  // 見出しがそれぞれのまとまりの中央に来るように、上から連続した行に区切って割り当てる
+  function assignLabels(rows, labels){
+    const n = rows.length, m = labels.length;
+    if(!m || m > n) return null;
+    const cost = (k, i, j) => Math.abs(labels[k].y - (rows[i].y + rows[j].y) / 2);
+    const dp = Array.from({ length: m }, () => new Array(n).fill(Infinity));
+    const from = Array.from({ length: m }, () => new Array(n).fill(-1));
+    for(let j = 0; j < n; j++) dp[0][j] = cost(0, 0, j);
+    for(let k = 1; k < m; k++) for(let j = k; j < n; j++) for(let i = k; i <= j; i++){
+      const c = dp[k-1][i-1] + cost(k, i, j);
+      if(c < dp[k][j]){ dp[k][j] = c; from[k][j] = i; }
+    }
+    const owner = new Array(n);
+    for(let k = m - 1, j = n - 1; k >= 0; k--){
+      const i = k === 0 ? 0 : from[k][j];
+      for(let r = i; r <= j; r++) owner[r] = k;
+      j = i - 1;
+    }
+    return owner;
+  }
+  // 「6・8・9・11」「５～１９」「全行政区」「3甲乙」などの行政区の書き方に、n区が含まれるか
+  function wardIncludes(text, n){
+    const t = nk(text).replace(/\s/g, "");
+    if(/全/.test(t)) return true;
+    return t.split(/[・,、]/).some(tok=>{
+      const r = tok.match(/^(\d+)[~〜\-－–―ー](\d+)/);
+      if(r) return Number(r[1]) <= n && n <= Number(r[2]);
+      const one = tok.match(/^(\d+)/);
+      return one ? Number(one[1]) === n : false;
+    });
+  }
+  const isTown = (s) => /^[^\d・\s]{1,4}町$/.test(nk(s));
+
+  // 1ページ目「燃えるごみ収集日程表」:曜日 → 町名・行政区
+  function parseBurnable(page){
+    const dayHead = page.items.find(it => nk(it.s) === "曜日");
+    const townHead = page.items.find(it => nk(it.s) === "町名");
+    if(!dayHead || !townHead || !/燃えるごみ収集日程表/.test(nk(page.text).replace(/\s/g, ""))) return null;
+    const below = page.items.filter(it => it.y < dayHead.y - 3);
+    const labels = below.filter(it => Math.abs(it.x - dayHead.x) < 15 && WD_INDEX[nk(it.s)] !== undefined)
+      .sort((a,b)=> b.y - a.y);
+    const rows = below.filter(it => Math.abs(it.x - townHead.x) < 15 && isTown(it.s))
+      .map(t => ({ y: t.y, town: nk(t.s),
+        ward: (below.find(w => Math.abs(w.y - t.y) <= 3 && w.x > t.x + 5 && w.x < t.x + 120) || { s: "" }).s }))
+      .sort((a,b)=> b.y - a.y);
+    const owner = assignLabels(rows, labels);
+    if(!owner) return null;
+    const hits = rows.map((r, i) => ({ r, day: nk(labels[owner[i]].s) }))
+      .filter(({ r }) => r.town === GOMI_AREA.town && wardIncludes(r.ward, GOMI_AREA.ward));
+    if(!hits.length) return null;
+    const weekdays = Array.from(new Set(hits.map(h => WD_INDEX[h.day]))).sort();
+    return { weekdays, source: GOMI_AREA.town + " " + nk(hits[0].r.ward) };
+  }
+
+  // 2ページ目以降「◯◯収集日程表」:行政区ごとに4月〜3月の収集日
+  function parseStream(page){
+    const rows = toRows(page.items);
+    const titleRow = rows.find(r => r.items.some(it => /収集日程表/.test(nk(it.s))));
+    const headerRow = rows.find(r => r.items.some(it => nk(it.s) === "収集日"));
+    if(!titleRow || !headerRow) return { error: null };
+    const title = nk(titleRow.items.map(i => i.s).join("")).replace(/\s/g, "");
+    const tm = title.match(/年度(.+?)の?収集日程表/);
+    if(!tm || tm[1] === "燃えるごみ") return { error: null };
+    const fyM = title.match(/\((\d{4})\)年度/) || title.match(/(\d{4})年度/);
+    const rM = title.match(/令和(\d{1,2})/);
+    const fy = fyM ? Number(fyM[1]) : rM ? 2018 + Number(rM[1]) : null;
+    const months = (nk(headerRow.items.map(i => i.s).join("")).match(/\d{1,2}(?=月)/g) || []).map(Number);
+    const expected = [4,5,6,7,8,9,10,11,12,1,2,3];
+    if(!fy || months.join() !== expected.join()) return { error: "「" + tm[1] + "」の表の見出し(年度・4月〜3月)を読み取れませんでした" };
+
+    const RULE = /^第([1-5])([日月火水木金土])曜日$/;
+    const dataRows = rows.filter(r => r.y < headerRow.y - 3 && r.items.some(it => RULE.test(nk(it.s))));
+    const towns = rows.filter(r => r.y < headerRow.y - 3)
+      .flatMap(r => r.items.filter(it => isTown(it.s) && it.x < headerRow.items[0].x + 40))
+      .sort((a,b)=> b.y - a.y);
+    const owner = assignLabels(dataRows, towns);
+    if(!owner) return { error: "「" + tm[1] + "」の表の町名を読み取れませんでした" };
+
+    const parsed = dataRows.map((r, i)=>{
+      const ruleItem = r.items.find(it => RULE.test(nk(it.s)));
+      const ward = r.items.filter(it => it.x < ruleItem.x - 5 && !isTown(it.s)).map(it => nk(it.s)).join("");
+      const cells = r.items.filter(it => it.x > ruleItem.x + 10).map(it => nk(it.s).replace(/\s/g, ""));
+      return { town: nk(towns[owner[i]].s), ward, rule: nk(ruleItem.s), cells };
+    });
+    const mine = parsed.filter(p => p.town === GOMI_AREA.town && wardIncludes(p.ward, GOMI_AREA.ward));
+    if(mine.length !== 1){
+      return { error: "「" + tm[1] + "」の表で" + GOMI_AREA.label + "の行が" + (mine.length ? mine.length + "行見つかりました" : "見つかりませんでした") };
+    }
+    const row = mine[0];
+    if(row.cells.length !== 12 || row.cells.some(c => !/^\(?\d{1,2}\)?$/.test(c))){
+      return { error: "「" + tm[1] + "」の" + GOMI_AREA.label + "の行の日付を12か月分読み取れませんでした(" + row.cells.join(" ") + ")" };
+    }
+    const dates = row.cells.map((c, i)=>{
+      const m = expected[i], y = m >= 4 ? fy : fy + 1;
+      return { date: y + "-" + pad(m) + "-" + pad(c.replace(/\D/g, "")), moved: /^\(/.test(c) };
+    });
+    return { fy, stream: { type: tm[1], rule: row.rule, ward: row.ward, dates } };
+  }
+
+  // 読み取った日付が、表の「第n◯曜日」の決まりどおりか。( )付きは祝日のため土曜日に移った日か
+  function checkStream(s){
+    const m = s.rule.match(/第(\d)(.)曜日/);
+    const n = Number(m[1]), dow = WD_INDEX[m[2]];
+    const bad = [];
+    s.dates.forEach(d=>{
+      const dt = toDate(d.date);
+      const nth = nthWeekday(dt.getFullYear(), dt.getMonth(), n, dow);
+      const okDate = d.moved ? dt.getDay() === 6 && isHoliday(nth) : localISO(nth) === d.date;
+      if(!okDate) bad.push(d.date);
+    });
+    return bad;
+  }
+
+  const gomiKind = (t) => /燃えない/.test(t) ? "燃えないごみ" : /新聞|雑誌|段ボール/.test(t) ? "新聞・雑誌・段ボール" : t;
+  const gomiDetail = (t) => /燃えない/.test(t) ? "ペットボトル・紙パック・スチール缶・アルミ缶も同じ日" : "";
+  const fmtMDs = (d) => (d.getMonth()+1) + "/" + d.getDate() + "(" + WD[d.getDay()] + ")";
+
+  let gomiRead = null;
+  async function handleGomiPdf(file){
+    if(!file) return;
+    $("gomiResult").innerHTML = "";
+    try{
+      $("gomiMsg").innerHTML = '<div class="toast busy">読み取りを始めます…</div>';
+      const pages = await readPdf(file, (i,n)=>{
+        $("gomiMsg").innerHTML = '<div class="toast busy">' + i + '/' + n + 'ページを読み取り中…</div>';
+      });
+      const burnable = pages.map(parseBurnable).find(Boolean);
+      const results = pages.map(parseStream);
+      const errors = results.map(r => r.error).filter(Boolean);
+      const streams = results.filter(r => r.stream);
+      if(!burnable) errors.unshift("燃えるごみの表で" + GOMI_AREA.label + "の曜日を読み取れませんでした");
+      if(!streams.length) errors.push("燃えないごみ・資源の収集日程表が見つかりませんでした");
+      const fys = Array.from(new Set(streams.map(r => r.fy)));
+      if(fys.length > 1) errors.push("年度が異なる表がまざっています(" + fys.join("・") + ")");
+      if(errors.length){
+        gomiRead = null;
+        $("gomiMsg").innerHTML = '<div class="toast bad">' + errors.map(esc).join("<br>") + '</div>';
+        return;
+      }
+      gomiRead = { fy: fys[0], file: file.name, burnable, streams: streams.map(r => r.stream) };
+      renderGomiRead();
+      say($("gomiMsg"), pages.length + "ページを読み取りました。内容を確かめて保存してください");
+    }catch(err){
+      say($("gomiMsg"), "読み取れませんでした: " + (err.message || err), true);
+    }finally{
+      $("gomiFile").value = "";
+    }
+  }
+  $("gomiFile").addEventListener("change", ()=> handleGomiPdf($("gomiFile").files[0]));
+
+  function renderGomiRead(){
+    const g = gomiRead;
+    if(!g){ $("gomiResult").innerHTML = ""; return; }
+    const checks = g.streams.map(s => ({ s, bad: checkStream(s) }));
+    const allOk = checks.every(c => !c.bad.length);
+    const exists = (store.gomiYears || []).some(y => y.fy === g.fy);
+    const months = g.streams[0].dates.map(d => toDate(d.date));
+    $("gomiResult").innerHTML = '<div class="readout">'
+      + '<h3>' + esc(reiwa(g.fy)) + '(' + g.fy + '年4月〜' + (g.fy + 1) + '年3月)・' + esc(GOMI_AREA.label) + '</h3>'
+      + '<div class="sub">' + esc(g.file) + '</div>'
+      + '<div class="found' + (allOk ? "" : " warn") + '"><strong>' + (allOk ? "読み取りOK" : "確認が必要な日付があります") + '</strong>'
+        + '燃えるごみ:毎週 ' + g.burnable.weekdays.map(w => WD[w] + "曜").join("・") + '(表の「' + esc(g.burnable.source) + '」)<br>'
+        + checks.map(c => esc(gomiKind(c.s.type)) + ':' + esc(c.s.rule) + '(行政区 ' + esc(c.s.ward) + ')… '
+          + (c.bad.length ? "決まりと合わない日 " + c.bad.map(d => fmtMDs(toDate(d))).join("・") : "12か月すべて決まりどおり")).join("<br>")
+      + '</div>'
+      + '<div class="table-wrap"><table class="gomi-table"><thead><tr><th>月</th>'
+        + g.streams.map(s => '<th>' + esc(gomiKind(s.type)) + '</th>').join("") + '</tr></thead><tbody>'
+        + months.map((m, i) => '<tr><th>' + (m.getMonth() + 1) + '月</th>'
+          + g.streams.map(s=>{
+              const d = s.dates[i], dt = toDate(d.date);
+              return '<td' + (d.moved ? ' class="moved"' : '') + '>' + fmtMDs(dt) + (d.moved ? '<span class="mv">祝日のため変更</span>' : '') + '</td>';
+            }).join("") + '</tr>').join("")
+      + '</tbody></table></div>'
+      + (exists ? '<div class="toast bad">' + esc(reiwa(g.fy)) + 'の収集日はすでに取り込まれています。保存すると置き換えます。</div>' : '')
+      + '<button type="button" class="go" id="gomiSave">この内容で保存する</button></div>';
+    $("gomiSave").addEventListener("click", ()=>{
+      store.gomiYears = (store.gomiYears || []).filter(y => y.fy !== g.fy);
+      store.gomiYears.push({ id: uid(), fy: g.fy, area: GOMI_AREA.label, file: g.file, importedAt: new Date().toISOString(),
+        burnable: g.burnable, streams: g.streams });
+      save();
+      gomiRead = null;
+      $("gomiResult").innerHTML = "";
+      say($("gomiMsg"), reiwa(g.fy) + "の収集日を保存しました。月が変わると自動でその月の収集日を表示します");
+      renderGomi(); renderAlerts();
+    });
+  }
+
+  /* ---------- ごみ(表示) ---------- */
   const latestGomi = () => SEED.gomi.slice().sort((a,b)=> String(b.month).localeCompare(String(a.month)))[0];
   const thisMonth = () => localISO().slice(0, 7);
   const monthLabel = (ym) => Number(ym.slice(5, 7)) + "月";
+  const yearRecord = (d) => (store.gomiYears || []).find(g => g.fy === fiscalYearOf(d));
+  // 取り込んだ年度の表から、その月の燃えないごみ・資源の収集日
+  function spotsOf(d){
+    const rec = yearRecord(d);
+    if(!rec) return null;
+    const ym = localISO(d).slice(0, 7);
+    return rec.streams.flatMap(s => s.dates.filter(x => x.date.startsWith(ym))
+      .map(x => ({ kind: gomiKind(s.type), detail: gomiDetail(s.type), date: toDate(x.date), moved: x.moved })))
+      .sort((a,b)=> a.date - b.date);
+  }
+  // 次の燃えるごみの日(祝日・年末年始は収集なし)
+  function nextBurnable(weekdays, from){
+    if(!Array.isArray(weekdays) || !weekdays.length) return null;
+    for(let i = 0; i < 21; i++){
+      const d = new Date(from.getFullYear(), from.getMonth(), from.getDate() + i);
+      if(weekdays.includes(d.getDay()) && !noCollection(d)) return d;
+    }
+    return null;
+  }
   function renderGomi(){
-    const d = latestGomi();
-    if(!d){ $("gomiBody").innerHTML = '<div class="empty">ごみ収集日の登録がありません。</div>'; return; }
-    const stale = d.month < thisMonth();
     const today = midnight(new Date());
-    const upcoming = [];
-    const weekly = nextWeekly(d.burnable && d.burnable.weekdays);
-    if(weekly) upcoming.push({ kind:"燃えるごみ", date: weekly });
-    const spots = (d.spot || []).map(s => ({ kind: s.type, date: toDate(s.date) })).filter(s => s.date);
-    spots.forEach(s => { if(s.date >= today) upcoming.push(s); });
-    upcoming.sort((a,b)=> a.date - b.date);
+    const ym = thisMonth();
+    const rec = yearRecord(today);
+    const seed = latestGomi();
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    let weekdays, spots, later = [], missing = false;
+    if(rec){
+      weekdays = rec.burnable.weekdays;
+      spots = spotsOf(today);
+      later = spotsOf(nextMonth) || [];
+    }else if(seed && seed.month === ym){
+      weekdays = seed.burnable.weekdays;
+      spots = (seed.spot || []).map(s => ({ kind: s.type, date: toDate(s.date) })).filter(s => s.date);
+    }else{
+      const last = (store.gomiYears || []).slice().sort((a,b)=> b.fy - a.fy)[0];
+      weekdays = last ? last.burnable.weekdays : seed ? seed.burnable.weekdays : [];
+      spots = [];
+      missing = true;
+    }
+
+    const burn = nextBurnable(weekdays, today);
+    const upcoming = (burn ? [{ kind: "燃えるごみ", date: burn }] : [])
+      .concat(spots.filter(s => s.date >= today), later)
+      .sort((a,b)=> a.date - b.date);
     const next = upcoming[0];
     setFigure("figGomi", next ? next.kind : "―", next ? " " + fmtMD(next.date) : "");
 
-    const rows = [{
-      kind:"燃えるごみ",
-      when:(d.burnable && d.burnable.label ? d.burnable.label : "―") + (weekly ? " ・ 次は" + fmtMD(weekly) : ""),
-      soon: weekly ? relative(weekly) : ""
-    }];
-    spots.forEach(s=>{
+    // 今月、燃えるごみの曜日なのに祝日で収集がない日
+    const skipped = [];
+    for(let d = new Date(today.getFullYear(), today.getMonth(), 1); d.getMonth() === today.getMonth(); d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)){
+      if(weekdays.includes(d.getDay()) && noCollection(d)) skipped.push(d);
+    }
+    const wdLabel = weekdays.length ? "毎週 " + weekdays.map(w => WD[w] + "曜").join("・") : "―";
+    const row = (kind, detail, when, soon, past) => '<div class="gomi-row' + (past ? " past" : "") + '"><span class="kind">' + esc(kind) + '</span>'
+      + '<span class="when">' + when + (detail ? '<small>' + esc(detail) + '</small>' : '') + '</span>'
+      + (soon ? '<span class="soon">' + esc(soon) + '</span>' : '') + '</div>';
+    const spotRow = (s) => {
       const past = s.date < today;
-      rows.push({ kind: s.kind, when: fmtMD(s.date) + (past ? " (済)" : ""), soon: past ? "" : relative(s.date) });
-    });
+      return row(s.kind, s.detail, esc(fmtMD(s.date)) + (s.moved ? ' <span class="mv">祝日のため土曜に変更</span>' : '') + (past ? " (済)" : ""),
+        past ? "" : relative(s.date), past);
+    };
 
     $("gomiBody").innerHTML =
-      (stale ? '<div class="toast bad">' + esc(monthLabel(thisMonth())) + '分の収集日が未登録です。下は'
-        + esc(monthLabel(d.month)) + '分の表です(燃えるごみの曜日は通常どおり)。' + esc(monthLabel(thisMonth()))
-        + '号の「ごみ収集日」で燃えないごみ・資源の日を確認してください。</div>' : '')
-      + (next ? '<div class="next-pickup"><span class="kicker">高田町8区・次の収集</span>'
+      (missing ? '<div class="toast bad">' + esc(monthLabel(ym)) + 'の収集日が分かりません。' + esc(reiwa(fiscalYearOf(today)))
+        + 'の収集日程表(PDF)を下の「年度の収集日程表を取り込む」から取り込んでください。燃えるごみの曜日は前回の表のものです。</div>' : '')
+      + (next ? '<div class="next-pickup"><span class="kicker">' + esc(GOMI_AREA.label) + '・次の収集</span>'
         + '<span class="what">' + esc(next.kind) + '</span>'
         + '<span class="when">' + esc(fmtMD(next.date) + " " + relative(next.date)) + '</span></div>' : '')
-      + '<div class="gomi-rows">' + rows.map(r =>
-          '<div class="gomi-row"><span class="kind">' + esc(r.kind) + '</span>'
-          + '<span class="when">' + esc(r.when) + '</span>'
-          + (r.soon ? '<span class="soon">' + esc(r.soon) + '</span>' : '') + '</div>'
-        ).join("") + '</div>'
-      + (d.caveat ? '<div class="notice"><strong>' + esc(d.caveat) + '</strong></div>' : '')
-      + (d.rule ? '<div class="notice">' + esc(d.rule) + '</div>' : '')
-      + '<div class="source">' + (d.month ? esc(d.month.replace("-","年") + "月分") + ' ・ ' : '')
-        + (d.contact ? '問い合わせ先:' + esc(d.contact) + '<br>' : '')
-        + (d.source ? '出典:' + esc(d.source) : '') + '</div>';
+      + '<div class="gomi-month">' + esc(monthLabel(ym)) + 'の収集日</div>'
+      + '<div class="gomi-rows">'
+        + row("燃えるごみ", "", esc(wdLabel) + (burn ? " ・ 次は" + esc(fmtMD(burn)) : ""), burn ? relative(burn) : "")
+        + (skipped.length ? row("", "", '<span class="mv">祝日・年末年始のため収集なし:' + esc(skipped.map(fmtMDs).join("・")) + '</span>', "") : "")
+        + spots.map(spotRow).join("")
+      + '</div>'
+      + (later.length ? '<div class="gomi-month">' + esc(monthLabel(localISO(nextMonth).slice(0, 7))) + 'の予定</div>'
+        + '<div class="gomi-rows">' + later.map(spotRow).join("") + '</div>' : '')
+      + (seed && seed.caveat ? '<div class="notice"><strong>燃えるごみは' + esc(seed.caveat) + '</strong></div>' : '')
+      + (seed && seed.rule ? '<div class="notice">' + esc(seed.rule) + '</div>' : '')
+      + '<div class="source">'
+        + (rec ? '出典:' + esc(reiwa(rec.fy)) + ' 収集日程表(' + esc(rec.file) + ')。燃えるごみは表の「' + esc(rec.burnable.source)
+            + '」、燃えないごみ・資源は行政区「' + esc(rec.streams[0].ward) + '」の区分。'
+          : seed && !missing ? '出典:' + esc(seed.source) : '')
+        + (seed && seed.contact ? '<br>問い合わせ先:' + esc(seed.contact) : '') + '</div>';
+
+    // 今年度の表がまだなら、取り込み欄を開いておく
+    $("gomiImport").open = !rec;
+    const years = (store.gomiYears || []).slice().sort((a,b)=> b.fy - a.fy);
+    $("gomiYears").innerHTML = years.length ? '<span class="chip-label sand">取り込んだ収集日程表</span>' + years.map(y =>
+      '<div class="issue-card"><div class="head"><span class="t">' + esc(reiwa(y.fy)) + '(' + y.fy + '年4月〜' + (y.fy + 1) + '年3月)</span>'
+      + '<button type="button" class="del" data-gomi-del="' + esc(y.id) + '">削除</button></div>'
+      + '<div class="d">' + esc(y.file) + ' ・ ' + esc(fmtStamp(y.importedAt)) + ' 取り込み</div></div>').join("") : "";
   }
+  $("gomiYears").addEventListener("click", (e)=>{
+    const btn = e.target.closest("button[data-gomi-del]");
+    if(!btn) return;
+    const y = (store.gomiYears || []).find(x => x.id === btn.dataset.gomiDel);
+    if(!y || !confirm(reiwa(y.fy) + "の収集日程表を削除しますか?")) return;
+    store.gomiYears = store.gomiYears.filter(x => x.id !== y.id);
+    save(); renderGomi(); renderAlerts();
+  });
 
   /* ---------- お知らせ ---------- */
   // 「広報りくぜんたかた 令和8年9月号(No.1218)」→「令和8年9月号」(お知らせ欄を短くするため)
@@ -1389,9 +1700,15 @@ button.ghost{
     const missing = missingIssues();
     if(missing.length) items.push({ tone: "sand", tag: "取り込み漏れ", goto: "tab-import",
       text: missing.join("・") + " がまだ取り込まれていません" });
-    const g = latestGomi();
-    if(g && g.month < thisMonth()) items.push({ tone: "sand", tag: "ごみ", goto: "tab-gomi",
-      text: monthLabel(thisMonth()) + "分のごみ収集日が未登録です" });
+    const now = new Date();
+    const seedGomi = latestGomi();
+    if(!yearRecord(now) && !(seedGomi && seedGomi.month === thisMonth())){
+      items.push({ tone: "sand", tag: "ごみ", goto: "tab-gomi", focus: "gomiImport",
+        text: reiwa(fiscalYearOf(now)) + "の収集日程表が未取り込みです(" + monthLabel(thisMonth()) + "のごみ収集日が分かりません)" });
+    }else if(now.getMonth() === 2 && now.getDate() >= 15 && !(store.gomiYears || []).some(y => y.fy === now.getFullYear())){
+      items.push({ tone: "sky", tag: "ごみ", goto: "tab-gomi", focus: "gomiImport",
+        text: "4月からの" + reiwa(now.getFullYear()) + "の収集日程表が配られたら取り込んでください" });
+    }
     if(store.recipients.length){
       const ago = daysAgo(store.lastExportAt);
       if(ago === null) items.push({ tone: "sky", tag: "控え", goto: "tab-import", focus: "backupForm",
@@ -1447,6 +1764,7 @@ button.ghost{
 
   /* ---------- 保存と復元 ---------- */
   $("backupForm").addEventListener("submit", (e)=> e.preventDefault());
+  $("gomiForm").addEventListener("submit", (e)=> e.preventDefault());
   $("exportBtn").addEventListener("click",()=>{
     store.lastExportAt = new Date().toISOString();
     save();
