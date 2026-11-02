@@ -7,10 +7,8 @@
 <meta name="apple-mobile-web-app-title" content="広報取り込み">
 <meta name="theme-color" content="#1487c4">
 <title>広報取り込みアプリ</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
 <style>
-/* 見出し用の丸ゴシック(M PLUS Rounded 1c を使う文字だけに絞って同梱。オフラインでも同じ見た目になる) */
-__FONT_FACES__
 :root{
   --paper:#edf3fa; --surface:#ffffff; --surface-2:#f6f9fd;
   --ink:#16324a; --ink-soft:#3f5a70; --muted:#7f93a6;
@@ -360,8 +358,6 @@ button.ghost{
 </head>
 <body>
 <script type="application/json" id="seedData">__SEED_JSON__</script>
-<script>__PDFJS_LIB__</script>
-<script type="text/plain" id="pdfWorkerSrc">__PDFJS_WORKER__</script>
 
 <div class="sheet">
   <header class="masthead">
@@ -1045,10 +1041,9 @@ button.ghost{
   });
 
   /* ---------- PDFの読み取り ---------- */
-  const CMAPS = { "Adobe-Japan1-UCS2": "__CMAP_B64__" };
   class EmbeddedCMapReaderFactory {
     async fetch({ name }){
-      const b64 = CMAPS[name];
+      const b64 = name === "Adobe-Japan1-UCS2" ? document.getElementById("cmapSrc").textContent.trim() : null;
       if(!b64) throw new Error("この字形表(" + name + ")は同梱されていません");
       const bin = atob(b64);
       const arr = new Uint8Array(bin.length);
@@ -1056,8 +1051,14 @@ button.ghost{
       return { cMapData: arr, compressionType: 1 };
     }
   }
+  // pdf.js はPDFを読むときに初めて実行する(アプリを開くのを速くするため)
   let workerUrl = null;
-  function pdfWorkerReady(){
+  function pdfReady(){
+    if(!window.pdfjsLib){
+      const lib = document.createElement("script");
+      lib.textContent = document.getElementById("pdfLibSrc").textContent;
+      document.head.appendChild(lib);
+    }
     if(!workerUrl){
       const src = document.getElementById("pdfWorkerSrc").textContent;
       workerUrl = URL.createObjectURL(new Blob([src], { type:"text/javascript" }));
@@ -1066,7 +1067,7 @@ button.ghost{
   }
 
   async function readPdf(file, onPage){
-    pdfWorkerReady();
+    pdfReady();
     const data = new Uint8Array(await file.arrayBuffer());
     const doc = await pdfjsLib.getDocument({
       data, CMapReaderFactory: EmbeddedCMapReaderFactory, cMapPacked: true, isEvalSupported: false
@@ -1804,5 +1805,14 @@ button.ghost{
   renderIssues(); renderRoster(); renderChecks(); renderToc(); renderGomi(); renderCats(); renderAlerts();
 })();
 </script>
+<!-- 見出し用の丸ゴシック(M PLUS Rounded 1c を使う文字だけに絞って同梱。オフラインでも同じ見た目になる)。
+     容量が大きいので、画面を先に出せるよう本文の後で読み込む -->
+<style>
+__FONT_FACES__
+</style>
+<!-- PDFを読むときにだけ使う pdf.js 一式(アプリを開くときには実行しない) -->
+<script type="text/plain" id="pdfLibSrc">__PDFJS_LIB__</script>
+<script type="text/plain" id="pdfWorkerSrc">__PDFJS_WORKER__</script>
+<script type="text/plain" id="cmapSrc">__CMAP_B64__</script>
 </body>
 </html>
